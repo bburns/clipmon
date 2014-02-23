@@ -15,20 +15,31 @@
 ; Author: brian burns <bburns.km@gmail.com>
 ; Date: 2014-02-21
 
-; Todo:
+
+; todo:
 ; convert to a minor mode
+; only use external clipboard, not emacs one. so can cut/rearrange text while it's running.
+
+
 ; name: clipboard monitor, clipm, clipmonitor, autocopy, autoclip, autopaste?
 ; prefix: clipm, clipmon, cmon, clipmonitor?
 
 
-; (clipmonitor-start)
-; (clipmonitor-stop)
+
 
 
 ;;; User settings
 
-(defcustom clipmonitor-interval 2 "Interval for checking clipboard, in seconds.")
-(defcustom clipmonitor-timeout 30 "Stop the timer if no clipboard activity after this many seconds.")
+(defcustom clipmonitor-interval 2
+  "Interval for checking clipboard, in seconds.")
+
+(defcustom clipmonitor-timeout 5
+  "Stop the timer if no clipboard activity after this many minutes. Set to nil for no timeout.")
+
+(defcustom clipmonitor-newlines 2
+  "Number of newlines to append after pasting clipboard contents.")
+
+; (setq clipmonitor-timeout 5)
 
 
 ;;; Private variables
@@ -40,8 +51,8 @@
 
 ;;; Keybindings
 
-; (global-set-key (kbd "<f12>") 'clipmonitor-start)
-; (global-set-key (kbd "<f12>") 'clipmonitor-stop)
+(global-set-key (kbd "C-<f12>") 'clipmonitor-start)
+(global-set-key (kbd "<f12>") 'clipmonitor-stop)
 
 
 ;;; Public functions
@@ -49,8 +60,9 @@
 (defun clipmonitor-start () (interactive)
   "Start the clipboard monitor timer, and check the clipboard contents each interval."
   (setq clipmonitor-previous-contents (clipboard-contents))
+  (setq clipmonitor-timeout-start (time))
   (setq clipmonitor-timer (run-at-time nil clipmonitor-interval 'clipmonitor-tick))
-  (message "Clipboard monitor started with timer interval %d seconds)." clipmonitor-interval)
+  (message "Clipboard monitor started with timer interval %d seconds." clipmonitor-interval)
   )
 
 (defun clipmonitor-stop () (interactive)
@@ -65,20 +77,21 @@
 (defun clipmonitor-tick ()
   "Check the contents of the clipboard - if they've changed, paste the contents."
   (let ((current-contents (clipboard-contents)))
-     ; if no change in clipboard, stop monitor if it's been idle a while
-    (if (string= current-contents clipmonitor-previous-contents)
+    (if (not (string= current-contents clipmonitor-previous-contents))
         (progn
-          (let ((idletime (- (time) clipmonitor-timeout-start)))
-            (when (> idletime clipmonitor-timeout)
-              (clipmonitor-stop)
-              (message "Clipboard monitor stopped after %d seconds of inactivity." clipmonitor-timeout)
-              (beep)
-              )))
-      ; else clipboard contents changed
-      (insert current-contents "\n")
-      (setq clipmonitor-previous-contents current-contents)
-      (setq clipmonitor-timeout-start (time))
-      )))
+          (insert current-contents)
+          (dotimes (i clipmonitor-newlines) (insert "\n"))
+          (setq clipmonitor-previous-contents current-contents)
+          (setq clipmonitor-timeout-start (time)))
+        ; no change in clipboard - stop monitor if it's been idle a while
+        (if clipmonitor-timeout
+            (let ((idletime (- (time) clipmonitor-timeout-start)))
+              (when (> idletime (* 60 clipmonitor-timeout))
+                (clipmonitor-stop)
+                (message "Clipboard monitor stopped after %d minutes of inactivity." clipmonitor-timeout)
+                (beep)
+                )))
+        )))
 
 
 ;;; Library
