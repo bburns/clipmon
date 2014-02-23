@@ -1,21 +1,21 @@
 ;;; clipmonitor (clipboard monitor)
 ;
-; description:
-; automatically paste contents of clipboard if change detected. 
+; Description:
+; Automatically paste contents of clipboard if change detected - 
 ; makes it easier to take notes from web pages.
 ;
-; usage: 
-; call function to start a timer.
-; it will check the clipboard every n seconds. 
-; if clipboard has changed, paste the contents. 
-; if no change detected after n seconds, turn off the timer. 
-; or call another function manually to turn it off. 
+; Usage: 
+; Call clipmonitor-start to start timer
+; It will check the clipboard every clipmonitor-interval seconds 
+; If clipboard has changed, paste the contents 
+; If no change detected after clipmonitor-timeout seconds, turn off the timer 
+; Or call clipmonitor-stop manually to turn it off 
 ;
-; site: https://github.com/bburns/clipmonitor
-; author: brian burns <bburns.km@gmail.com>
-; date: 2014-02-21
+; Site: https://github.com/bburns/clipmonitor
+; Author: brian burns <bburns.km@gmail.com>
+; Date: 2014-02-21
 
-; todo:
+; Todo:
 ; convert to a minor mode
 ; name: clipboard monitor, clipm, clipmonitor, autocopy, autoclip, autopaste?
 ; prefix: clipm, clipmon, cmon, clipmonitor?
@@ -25,26 +25,26 @@
 ; (clipmonitor-stop)
 
 
-;;; user settings
+;;; User settings
 
 (defcustom clipmonitor-interval 2 "Interval for checking clipboard, in seconds.")
 (defcustom clipmonitor-timeout 30 "Stop the timer if no clipboard activity after this many seconds.")
 
 
-;;; private variables
+;;; Private variables
 
 (defvar clipmonitor-timer nil "Timer handle for clipboard monitor.")
 (defvar clipmonitor-timeout-start nil "Time that timeout timer was started.")
 (defvar clipmonitor-previous-contents nil "Last contents of the clipboard.")
 
 
-;;; keybindings
+;;; Keybindings
 
 ; (global-set-key (kbd "<f12>") 'clipmonitor-start)
 ; (global-set-key (kbd "<f12>") 'clipmonitor-stop)
 
 
-;;; public functions
+;;; Public functions
 
 (defun clipmonitor-start () (interactive)
   "Start the clipboard monitor timer, and check the clipboard contents each interval."
@@ -60,7 +60,7 @@
   )
 
 
-;;; private functions
+;;; Private functions
 
 (defun clipmonitor-tick ()
   "Check the contents of the clipboard - if they've changed, paste the contents."
@@ -81,7 +81,7 @@
       )))
 
 
-;;; library
+;;; Library
 
 (defun clipboard-contents (&optional arg)
   "Return the current or previous clipboard contents.
@@ -107,5 +107,7 @@ With :all, return all clipboard contents in a list."
 ; (clipboard-contents "hi")
 
 
+
+(provide 'clipmonitor)
 
 ; eof
