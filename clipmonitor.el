@@ -19,7 +19,7 @@
 ; todo:
 ; convert to a minor mode
 ; only use external clipboard, not emacs one. so can cut/rearrange text while it's running.
-
+ 
 
 ; name: clipboard monitor, clipm, clipmonitor, autocopy, autoclip, autopaste?
 ; prefix: clipm, clipmon, cmon, clipmonitor?
@@ -36,10 +36,14 @@
 (defcustom clipmonitor-timeout 5
   "Stop the timer if no clipboard activity after this many minutes. Set to nil for no timeout.")
 
-(defcustom clipmonitor-newlines 2
+(defcustom clipmonitor-newlines 1
   "Number of newlines to append after pasting clipboard contents.")
 
-; (setq clipmonitor-timeout 5)
+(defcustom clipmonitor-sound t
+  "Sound to play when pasting text - t for default beep, nil for none, or path to sound file.")
+
+(defcustom clipmonitor-trim-string t
+  "Remove leading whitespace from string before pasting.")
 
 
 ;;; Private variables
@@ -51,23 +55,29 @@
 
 ;;; Keybindings
 
-(global-set-key (kbd "C-<f12>") 'clipmonitor-start)
-(global-set-key (kbd "<f12>") 'clipmonitor-stop)
+; (setq clipmonitor-key "<f12>")
+(setq clipmonitor-key "<M-f2>")
+
+(global-set-key (kbd clipmonitor-key) (lambda () (interactive)
+                                (if clipmonitor-timer (clipmonitor-stop) (clipmonitor-start))))
 
 
 ;;; Public functions
 
 (defun clipmonitor-start () (interactive)
   "Start the clipboard monitor timer, and check the clipboard contents each interval."
-  (setq clipmonitor-previous-contents (clipboard-contents))
-  (setq clipmonitor-timeout-start (time))
-  (setq clipmonitor-timer (run-at-time nil clipmonitor-interval 'clipmonitor-tick))
-  (message "Clipboard monitor started with timer interval %d seconds." clipmonitor-interval)
-  )
+  (if clipmonitor-timer (message "Clipboard monitor already running. Stop with %s." clipmonitor-key)
+    (setq clipmonitor-previous-contents (clipboard-contents))
+    (setq clipmonitor-timeout-start (time))
+    (setq clipmonitor-timer (run-at-time nil clipmonitor-interval 'clipmonitor-tick))
+    (message "Clipboard monitor started with timer interval %d seconds. Stop with %s." clipmonitor-interval clipmonitor-key)
+    (clipmonitor-play-sound)
+    ))
 
 (defun clipmonitor-stop () (interactive)
   "Stop the clipboard monitor timer."
   (cancel-timer clipmonitor-timer)
+  (setq clipmonitor-timer nil)
   (message "Clipboard monitor stopped.")
   )
 
@@ -79,8 +89,11 @@
   (let ((current-contents (clipboard-contents)))
     (if (not (string= current-contents clipmonitor-previous-contents))
         (progn
-          (insert current-contents)
+          (if clipmonitor-trim-string
+              (insert (s-trim-left current-contents))
+            (insert current-contents))
           (dotimes (i clipmonitor-newlines) (insert "\n"))
+          (if clipmonitor-sound (clipmonitor-play-sound))
           (setq clipmonitor-previous-contents current-contents)
           (setq clipmonitor-timeout-start (time)))
         ; no change in clipboard - stop monitor if it's been idle a while
@@ -94,6 +107,16 @@
         )))
 
 
+(defun clipmonitor-play-sound ()
+  "Play a sound - if clipmonitor-sound is t, play the default beep, otherwise
+if it's a string, play the sound file at the path."
+  ; (if clipmonitor-sound
+      ; (if (stringp clipmonitor-sound) (play-sound-file clipmonitor-sound)) (beep)))
+  (cond
+   ((eq clipmonitor-sound t) (beep))
+   ((stringp clipmonitor-sound) (play-sound-file clipmonitor-sound)))) ;. catch error
+
+
 ;;; Library
 
 (defun clipboard-contents (&optional arg)
@@ -101,11 +124,7 @@
 With nil or 0 argument, return the most recent item.
 With numeric argument, return that item.
 With :all, return all clipboard contents in a list."
-  ; (if (null arg) (nth 0 kill-ring) (if (eq t arg) kill-ring (nth arg kill-ring))))
-  ; (if (null arg) (nth 0 kill-ring) (if (integerp arg) (nth arg kill-ring) kill-ring)))
   (cond
-   ; ((null arg) (nth 0 kill-ring))
-   ; ((integerp arg) (nth arg kill-ring))
    ((null arg) (current-kill 0))
    ((integerp arg) (current-kill arg))
    ((eq :all arg) kill-ring)
@@ -120,6 +139,23 @@ With :all, return all clipboard contents in a list."
 ; (clipboard-contents "hi")
 
 
+; from https://github.com/magnars/s.el
+(defun s-trim-left (s)
+  "Remove whitespace at the beginning of S."
+  (if (string-match "\\`[ \t\n\r]+" s)
+      (replace-match "" t t s)
+    s))
+
+
+
+;;; Testing
+
+; (setq clipmonitor-timeout 5)
+; timer-list
+; (cancel-function-timers 'clipmonitor-tick)
+
+
+;;; Provide
 
 (provide 'clipmonitor)
 
