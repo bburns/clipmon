@@ -1,98 +1,54 @@
-;;; clipmon
-;;; ------------------------------------------------------------
-;;; About
-; 
-; Description
-; clipmon (clipboard monitor)
-; Automatically pastes contents of clipboard if change detected - 
-; can be useful for taking notes from web pages or other sources, etc.
-; 
-; Usage 
-; Call (clipmon-start) to start the timer - it will check the clipboard
-; every clipmon-interval seconds.
-; If the clipboard has changed, it will paste the contents at the current location. 
-; If no change is detected after clipmon-timeout seconds, it will turn off the timer, 
-; or you can call (clipmon-stop) turn it off manually.
-; You can also call (clipmon-toggle) to turn it on or off. 
-;
-; Suggested binding
-; (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
-; 
-; License
-; MIT. NO WARRANTY.
-;
-; About
-; https://github.com/bburns/clipmon
-; Brian Burns <bburns.km@gmail.com>
-;
-; History
-; 2014-08-16 
-; 2014-07-22 first release
-; 2014-02-21 started
+;;; clipmon.el --- Clipboard monitor - paste contents of clipboard on change.
+;;; About:
+
+;; Copyright (C) 2014 Brian Burns
+;; 
+;; Author: Brian Burns <bburns.km@gmail.com>
+;; URL: https://github.com/bburns/clipmon
+;; Version: 0.1.20141130
+;; 
+;; Keywords: clipboard, paste, autopaste
+;; Package-Requires: ((s "0.0.1"))
+;; License: MIT. NO WARRANTY.
+;; Created: 2014-02-21
 
 
-;;; Todo
+;;; Commentary:
 
-; add visual indicator that clipmon is on
-; only use external clipboard, not emacs one. so can cut/rearrange text while it's running.
-; make custom group
+;; Automatically pastes contents of clipboard if change detected
+;; after n seconds. Useful for taking notes from web pages, etc.
+;; 
+;; Usage
+;; Bind (clipmon-toggle) to a key, eg M-f2, and use this to start/stop clipmon. 
+;; Start the timer - it will check the clipboard every clipmon-interval seconds.
+;; If the clipboard has changed, it will paste the contents at the current location. 
+;; If no change is detected after clipmon-timeout seconds, it will turn off the timer, 
+;; or you can call (clipmon-stop) turn it off manually.
+;; You can also call (clipmon-toggle) to turn it on or off. 
+;;
+;; Suggested binding
+;; (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
  
-; bug - lost timer
+
+;;; Todo:
+
+;> add visual indicator that clipmon is on
+;> only use external clipboard, not emacs one. so can cut/rearrange text while it's running.
+;> make custom group
+ 
+;> bug - try to start with empty kill ring - gives error on calling current-kill
+
+;> bug - lost timer
 ; when put laptop to sleep with it on, on resuming,
 ; it seemed to lose track of the timer, and couldn't turn it off without
 ; calling (cancel-function-timers 'clipmon-tick)
 
 
-;;; ------------------------------------------------------------
-;;; Requires
+;;; Code:
 
 (require 's) ; string library
 
-
-;;; Library
-
-(defun clipboard-contents (&optional arg)
-  "Return the current or previous clipboard contents.
-With nil or 0 argument, return the most recent item.
-With numeric argument, return that item.
-With :all, return all clipboard contents in a list."
-  (cond
-   ((null arg) (current-kill 0))
-   ((integerp arg) (current-kill arg))
-   ((eq :all arg) kill-ring)
-   (t nil)))
-
-; test
-; (clipboard-contents)
-; (clipboard-contents 0)
-; (clipboard-contents 9)
-; (clipboard-contents :all)
-
-
-
-
-(defun function-get-keys (function)
-  "Get list of keys bound to a function, as a string.
-For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
-  (mapconcat 'key-description (where-is-internal function) ", "))
-
-; test
-; (function-get-keys 'where-is)
-; (function-get-keys 'ibuffer)
-; (function-get-keys 'undo)
-
-
-; used to get path to included sound file
-(defun load-file-directory ()
-  "Get directory of file being loaded."
-  (file-name-directory load-file-name))
-
-; test
-; (let ((load-file-name "c:/foo/")) (load-file-directory))
-; (let ((load-file-name "c:/foo/")) (concat (load-file-directory) "ting.wav")) 
-
-
-;;; Public settings
+;;;; Public settings
 
 (defcustom clipmon-interval 2
   "Interval for checking clipboard, in seconds.")
@@ -103,7 +59,8 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 (defcustom clipmon-trim-string t
   "Remove leading whitespace from string before pasting.")
 
-(defcustom clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]"
+; (defcustom clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]"
+(defcustom clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
   "Regexp to match text to remove before pasting, eg Wikipedia-style references - [3], [12].")
 
 ; test
@@ -123,7 +80,8 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 (defcustom clipmon-newlines 2
   "Number of newlines to append after pasting clipboard contents.")
 
-(defcustom clipmon-sound (concat (load-file-directory) "ting.wav")
+; (defcustom clipmon-sound (concat (load-file-directory) "ting.wav")
+(defcustom clipmon-sound (concat (load-file-directory) "ding.wav")
   "Sound to play when pasting text - t for default beep, nil for none, or path to sound file.")
 
 ; test
@@ -131,10 +89,12 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 ; (setq clipmon-sound nil)
 ; (setq clipmon-sound t)
 ; (setq clipmon-sound (path-current "ting.wav"))
+; (setq clipmon-sound (path-current "ding.wav"))
+; (setq clipmon-sound (concat (file-directory) "ting.wav"))
+; (setq clipmon-sound (concat (file-directory) "ding.wav"))
 
 
-
-;;; Public functions
+;;;; Public functions
 
 (defun clipmon-toggle ()
   "Turn clipmon on and off."
@@ -172,15 +132,15 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 
 
 
-;;; ------------------------------------------------------------
-;;; Private variables
+;;;; ------------------------------------------------------------
+;;;; Private variables
 
 (defvar clipmon-timer nil "Timer handle for clipboard monitor.")
 (defvar clipmon-timeout-start nil "Time that timeout timer was started.")
 (defvar clipmon-previous-contents nil "Last contents of the clipboard.")
 
 
-;;; Private functions
+;;;; Private functions
 
 (defun clipmon-tick ()
   "Check the contents of the clipboard - if it has changed, paste the contents."
@@ -215,9 +175,49 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
       (if (stringp clipmon-sound) (play-sound-file clipmon-sound) (beep))))
 
 
-;;; ------------------------------------------------------------
-;;; Provide
+;;;; Library functions
+
+(defun clipboard-contents (&optional arg)
+  "Return the current or previous clipboard contents.
+With nil or 0 argument, return the most recent item.
+With numeric argument, return that item.
+With :all, return all clipboard contents in a list."
+  (cond
+   ((null arg) (current-kill 0))
+   ((integerp arg) (current-kill arg))
+   ((eq :all arg) kill-ring)
+   (t nil)))
+
+; test
+; (clipboard-contents)
+; (clipboard-contents 0)
+; (clipboard-contents 9)
+; (clipboard-contents :all)
+
+
+(defun function-get-keys (function)
+  "Get list of keys bound to a function, as a string.
+For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
+  (mapconcat 'key-description (where-is-internal function) ", "))
+
+; test
+; (function-get-keys 'where-is)
+; (function-get-keys 'ibuffer)
+; (function-get-keys 'undo)
+
+
+; used to get path to included sound file
+(defun load-file-directory ()
+  "Get directory of file being loaded."
+  (file-name-directory load-file-name))
+
+; test - load-file-name is normally set by emacs during file load
+; (let ((load-file-name "c:/foo/")) (load-file-directory))
+; (let ((load-file-name "c:/foo/")) (concat (load-file-directory) "ting.wav")) 
+
+
+;;;; Provide
 
 (provide 'clipmon)
 
-; eof
+;;; clipmon.el ends here
