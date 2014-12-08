@@ -1,4 +1,11 @@
 ;;; clipmon.el --- Clipboard monitor - paste contents of clipboard on change.
+
+; outline-regexp
+; ";[;]\\{1,8\\} "
+
+; (setq outline-regexp "^;;[;]+ ")
+
+
 ;;; About:
 
 ;; Copyright (C) 2014 Brian Burns
@@ -12,28 +19,35 @@
 ;; License: MIT. NO WARRANTY.
 ;; Created: 2014-02-21
 
-
 ;;; Commentary:
 
 ;; Automatically pastes contents of clipboard if change detected
-;; after n seconds. Useful for taking notes from web pages, etc.
+;; after n seconds. Mainly developed to take notes from web pages -
+;; most convenient when used with an autocopy plugin for the browser also. 
 ;; 
 ;; Usage
-;; Bind (clipmon-toggle) to a key, eg M-f2, and use this to start/stop clipmon. 
-;; Start the timer - it will check the clipboard every clipmon-interval seconds.
-;; If the clipboard has changed, it will paste the contents at the current location. 
-;; If no change is detected after clipmon-timeout seconds, it will turn off the timer, 
-;; or you can call (clipmon-stop) turn it off manually.
-;; You can also call (clipmon-toggle) to turn it on or off. 
-;;
-;; Suggested binding
-;; (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
- 
+;; 
+;; Start the monitor with `clipmon-toggle' - it will check the clipboard every
+;; `clipmon-interval' seconds and paste any new contents at the current
+;; location. If no change is detected after `clipmon-timeout' seconds, the
+;; monitor will turn itself off, or you can call `clipmon-toggle' turn it off
+;; manually.
+;; 
+;; Keybinding
+;; 
+;; You can bind `clipmon-toggle' to a key, eg `M-f2', and use this to
+;; start/stop clipmon. Add this to your .emacs file: 
+;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
+;; It can go at any point in your .emacs file.
+
 
 ;;; Todo:
 
 ;> add visual indicator that clipmon is on
 ;> only use external clipboard, not emacs one. so can cut/rearrange text while it's running.
+
+;> test with -Q
+;> requirements, package load
 ;> make custom group
  
 ;> bug - try to start with empty kill ring - gives error on calling current-kill
@@ -45,8 +59,49 @@
 
 
 ;;; Code:
+;;;; Library functions
 
 (require 's) ; string library
+
+(defun clipboard-contents (&optional arg)
+  "Return the current or previous clipboard contents.
+With nil or 0 argument, return the most recent item.
+With numeric argument, return that item.
+With :all, return all clipboard contents in a list."
+  (cond
+   ((null arg) (current-kill 0))
+   ((integerp arg) (current-kill arg))
+   ((eq :all arg) kill-ring)
+   (t nil)))
+
+; test
+; (clipboard-contents)
+; (clipboard-contents 0)
+; (clipboard-contents 9)
+; (clipboard-contents :all)
+
+
+(defun function-get-keys (function)
+  "Get list of keys bound to a function, as a string.
+For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
+  (mapconcat 'key-description (where-is-internal function) ", "))
+
+; test
+; (function-get-keys 'where-is)
+; (function-get-keys 'ibuffer)
+; (function-get-keys 'undo)
+
+
+; used to get path to included sound file
+(defun load-file-directory ()
+  "Get directory of file being loaded."
+  ; load-file-name has full name of current file
+  (file-name-directory load-file-name))
+
+; test - load-file-name is normally set by emacs during file load
+; (let ((load-file-name "c:/foo/")) (load-file-directory))
+; (let ((load-file-name "c:/foo/")) (concat (load-file-directory) "ting.wav")) 
+
 
 ;;;; Public settings
 
@@ -173,47 +228,6 @@
   "Play a sound file, the default beep, or nothing."
   (if clipmon-sound
       (if (stringp clipmon-sound) (play-sound-file clipmon-sound) (beep))))
-
-
-;;;; Library functions
-
-(defun clipboard-contents (&optional arg)
-  "Return the current or previous clipboard contents.
-With nil or 0 argument, return the most recent item.
-With numeric argument, return that item.
-With :all, return all clipboard contents in a list."
-  (cond
-   ((null arg) (current-kill 0))
-   ((integerp arg) (current-kill arg))
-   ((eq :all arg) kill-ring)
-   (t nil)))
-
-; test
-; (clipboard-contents)
-; (clipboard-contents 0)
-; (clipboard-contents 9)
-; (clipboard-contents :all)
-
-
-(defun function-get-keys (function)
-  "Get list of keys bound to a function, as a string.
-For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
-  (mapconcat 'key-description (where-is-internal function) ", "))
-
-; test
-; (function-get-keys 'where-is)
-; (function-get-keys 'ibuffer)
-; (function-get-keys 'undo)
-
-
-; used to get path to included sound file
-(defun load-file-directory ()
-  "Get directory of file being loaded."
-  (file-name-directory load-file-name))
-
-; test - load-file-name is normally set by emacs during file load
-; (let ((load-file-name "c:/foo/")) (load-file-directory))
-; (let ((load-file-name "c:/foo/")) (concat (load-file-directory) "ting.wav")) 
 
 
 ;;;; Provide
