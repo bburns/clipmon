@@ -55,7 +55,7 @@
 ;> bug - lost timer
 ; when put laptop to sleep with it on, on resuming,
 ; it seemed to lose track of the timer, and couldn't turn it off without
-; calling (cancel-function-timers 'clipmon-tick)
+; calling (cancel-function-timers 'clipmon--tick)
 
 
 ;;; Code:
@@ -114,7 +114,6 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 (defcustom clipmon-trim-string t
   "Remove leading whitespace from string before pasting.")
 
-; (defcustom clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]"
 (defcustom clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
   "Regexp to match text to remove before pasting, eg Wikipedia-style references - [3], [12].")
 
@@ -135,7 +134,6 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 (defcustom clipmon-newlines 2
   "Number of newlines to append after pasting clipboard contents.")
 
-; (defcustom clipmon-sound (concat (load-file-directory) "ting.wav")
 (defcustom clipmon-sound (concat (load-file-directory) "ding.wav")
   "Sound to play when pasting text - t for default beep, nil for none, or path to sound file.")
 
@@ -154,57 +152,57 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 (defun clipmon-toggle ()
   "Turn clipmon on and off."
   (interactive)
-  (if clipmon-timer (clipmon-stop) (clipmon-start)))
+  (if clipmon--timer (clipmon-stop) (clipmon-start)))
 
 
 (defun clipmon-start () 
   "Start the clipboard monitor timer, and check the clipboard contents each interval."
   (interactive)
-  (setq clipmon-keys (function-get-keys 'clipmon-toggle)) ; eg "<M-f2>, C-0"
-  (if clipmon-timer (message "Clipboard monitor already running. Stop with %s." clipmon-keys)
-    (setq clipmon-previous-contents (clipboard-contents))
-    (setq clipmon-timeout-start (time))
-    (setq clipmon-timer (run-at-time nil clipmon-interval 'clipmon-tick))
-    (message "Clipboard monitor started with timer interval %d seconds. Stop with %s." clipmon-interval clipmon-keys)
-    (clipmon-play-sound)
-    ))
+  (let ((clipmon-keys (function-get-keys 'clipmon-toggle))) ; eg "<M-f2>, C-0"
+    (if clipmon--timer (message "Clipboard monitor already running. Stop with %s." clipmon-keys)
+      (setq clipmon--previous-contents (clipboard-contents))
+      (setq clipmon--timeout-start (time))
+      (setq clipmon--timer (run-at-time nil clipmon-interval 'clipmon--tick))
+      (message "Clipboard monitor started with timer interval %d seconds. Stop with %s." clipmon-interval clipmon-keys)
+      (clipmon--play-sound)
+      )))
 
 
 (defun clipmon-stop () 
   "Stop the clipboard monitor timer."
   (interactive)
-  (cancel-timer clipmon-timer)
-  (setq clipmon-timer nil)
+  (cancel-timer clipmon--timer)
+  (setq clipmon--timer nil)
   (message "Clipboard monitor stopped.")
-  (clipmon-play-sound)
+  (clipmon--play-sound)
   )
 
 ; test
 ; (clipmon-start)
 ; timer-list
 ; (clipmon-stop)
-; (cancel-function-timers 'clipmon-tick)
+; (cancel-function-timers 'clipmon--tick)
 
 
 
 ;;;; ------------------------------------------------------------
 ;;;; Private variables
 
-(defvar clipmon-timer nil "Timer handle for clipboard monitor.")
-(defvar clipmon-timeout-start nil "Time that timeout timer was started.")
-(defvar clipmon-previous-contents nil "Last contents of the clipboard.")
+(defvar clipmon--timer nil "Timer handle for clipboard monitor.")
+(defvar clipmon--timeout-start nil "Time that timeout timer was started.")
+(defvar clipmon--previous-contents nil "Last contents of the clipboard.")
 
 
 ;;;; Private functions
 
-(defun clipmon-tick ()
+(defun clipmon--tick ()
   "Check the contents of the clipboard - if it has changed, paste the contents."
   (let ((s (clipboard-contents)))
-    (if (not (string-equal s clipmon-previous-contents))
-        (clipmon-paste s)
+    (if (not (string-equal s clipmon--previous-contents))
+        (clipmon--paste s)
         ; no change in clipboard - if timeout is set, stop monitor if it's been idle a while
         (if clipmon-timeout
-            (let ((idletime (- (time) clipmon-timeout-start)))
+            (let ((idletime (- (time) clipmon--timeout-start)))
               (when (> idletime (* 60 clipmon-timeout))
                 (clipmon-stop)
                 (message "Clipboard monitor stopped after %d minutes of inactivity." clipmon-timeout)
@@ -212,19 +210,19 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
         )))
 
 
-(defun clipmon-paste (s)
+(defun clipmon--paste (s)
   "Insert the string at the current location, play sound, and update the state."
-  (setq clipmon-previous-contents s)
+  (setq clipmon--previous-contents s)
   (if clipmon-trim-string (setq s (s-trim-left s)))
   ; (if clipmon-remove-wikipedia-references (setq s (replace-regexp-in-string "\\[[0-9]+\\]" "" s)))
   (if clipmon-remove-regexp (setq s (replace-regexp-in-string clipmon-remove-regexp "" s)))
   (insert s)
   (dotimes (i clipmon-newlines) (insert "\n"))
-  (if clipmon-sound (clipmon-play-sound))
-  (setq clipmon-timeout-start (time)))
+  (if clipmon-sound (clipmon--play-sound))
+  (setq clipmon--timeout-start (time)))
 
 
-(defun clipmon-play-sound ()
+(defun clipmon--play-sound ()
   "Play a sound file, the default beep, or nothing."
   (if clipmon-sound
       (if (stringp clipmon-sound) (play-sound-file clipmon-sound) (beep))))
