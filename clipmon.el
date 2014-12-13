@@ -16,7 +16,7 @@
 ;; 
 ;; Keywords: clipboard, paste, autopaste
 ;; Package-Requires: ((s "0.0.1"))
-;; License: MIT. NO WARRANTY.
+;; License: MIT
 ;; Created: 2014-02-21
 
 ;;; Commentary:
@@ -116,7 +116,6 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 
 (defcustom clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
   "Regexp to match text to remove before pasting, eg Wikipedia-style references - [3], [12].")
-
 ; test
 ; (setq clipmon-remove-regexp "\\[([0-9]+\\|citation needed)\\]")
 ; (setq clipmon-remove-regexp "\\[[0-9]+\\]")
@@ -136,7 +135,6 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 
 (defcustom clipmon-sound (concat (load-file-directory) "ding.wav")
   "Sound to play when pasting text - t for default beep, nil for none, or path to sound file.")
-
 ; test
 ; (unbind 'clipmon-sound)
 ; (setq clipmon-sound nil)
@@ -145,6 +143,11 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 ; (setq clipmon-sound (path-current "ding.wav"))
 ; (setq clipmon-sound (concat (file-directory) "ting.wav"))
 ; (setq clipmon-sound (concat (file-directory) "ding.wav"))
+
+
+(defcustom clipmon-cursor-color "red"
+  "Color to set cursor when clipmon is on. Set to nil for no change.")
+
 
 
 ;;;; Public functions
@@ -163,6 +166,10 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
       (setq clipmon--previous-contents (clipboard-contents))
       (setq clipmon--timeout-start (time))
       (setq clipmon--timer (run-at-time nil clipmon-interval 'clipmon--tick))
+      (when clipmon-cursor-color
+        (setq clipmon--cursor-color-original (face-background 'cursor))
+        (set-face-background 'cursor clipmon-cursor-color)
+        )
       (message "Clipboard monitor started with timer interval %d seconds. Stop with %s." clipmon-interval clipmon-keys)
       (clipmon--play-sound)
       )))
@@ -173,6 +180,8 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
   (interactive)
   (cancel-timer clipmon--timer)
   (setq clipmon--timer nil)
+  (if clipmon--cursor-color-original
+      (set-face-background 'cursor clipmon--cursor-color-original))
   (message "Clipboard monitor stopped.")
   (clipmon--play-sound)
   )
@@ -191,6 +200,7 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 (defvar clipmon--timer nil "Timer handle for clipboard monitor.")
 (defvar clipmon--timeout-start nil "Time that timeout timer was started.")
 (defvar clipmon--previous-contents nil "Last contents of the clipboard.")
+(defvar clipmon--cursor-color-original nil "Original cursor color.")
 
 
 ;;;; Private functions
