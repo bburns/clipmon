@@ -1,11 +1,4 @@
 ;;; clipmon.el --- Clipboard monitor - paste contents of clipboard on change.
-
-; outline-regexp
-; ";[;]\\{1,8\\} "
-
-; (setq outline-regexp "^;;[;]+ ")
-
-
 ;;; About:
 
 ;; Copyright (C) 2014 Brian Burns
@@ -21,30 +14,37 @@
 
 ;;; Commentary:
 
-;; Automatically pastes contents of clipboard if change detected
-;; after n seconds. Mainly developed to take notes from web pages -
-;; most convenient when used with an autocopy plugin for the browser also. 
+;; Automatically pastes contents of clipboard if change detected after
+;; a certain time interval. 
 ;; 
+;; Useful for taking notes from the web - best when paired with an autocopy
+;; feature or plugin for the browser, so can just select text to copy it to the clipboard, e.g.
+;; 
+;; AutoCopy 2 for Firefox
+;; https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
+;;
+;;
 ;; Usage
-;; 
+;;
 ;; Start the monitor with `clipmon-toggle' - it will check the clipboard every
 ;; `clipmon-interval' seconds and paste any new contents at the current
-;; location. If no change is detected after `clipmon-timeout' seconds, the
-;; monitor will turn itself off, or you can call `clipmon-toggle' turn it off
+;; location. The cursor changes color to indicate the clipboard is being monitored.
+;; 
+;; If no change is detected after `clipmon-timeout' seconds, the
+;; monitor will turn itself off, or you can call `clipmon-toggle' again to turn it off
 ;; manually.
 ;; 
-;; Keybinding
+;; Keybindings
 ;; 
 ;; You can bind `clipmon-toggle' to a key, eg `M-f2', and use this to
-;; start/stop clipmon. Add this to your .emacs file: 
+;; start/stop clipmon. Add something like this to your .emacs file: 
 ;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
-;; It can go at any point in your .emacs file.
 
 
 ;;; Todo:
 
-;> add visual indicator that clipmon is on
 ;> only use external clipboard, not emacs one. so can cut/rearrange text while it's running.
+;> preserve echo message? often gets wiped out
 
 ;> test with -Q
 ;> requirements, package load
@@ -65,7 +65,7 @@
 
 (defun clipboard-contents (&optional arg)
   "Return the current or previous clipboard contents.
-With nil or 0 argument, return the most recent item.
+With no argument, nil or 0, return the most recent item.
 With numeric argument, return that item.
 With :all, return all clipboard contents in a list."
   (cond
@@ -83,7 +83,7 @@ With :all, return all clipboard contents in a list."
 
 (defun function-get-keys (function)
   "Get list of keys bound to a function, as a string.
-For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
+E.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
   (mapconcat 'key-description (where-is-internal function) ", "))
 
 ; test
@@ -116,6 +116,7 @@ For example, (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 
 (defcustom clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
   "Regexp to match text to remove before pasting, eg Wikipedia-style references - [3], [12].")
+
 ; test
 ; (setq clipmon-remove-regexp "\\[([0-9]+\\|citation needed)\\]")
 ; (setq clipmon-remove-regexp "\\[[0-9]+\\]")
