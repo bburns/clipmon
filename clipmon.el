@@ -63,27 +63,14 @@
 
 (require 's) ; string library
 
-(defun clipboard-contents (&optional arg)
-  "Return the current or previous clipboard contents.
-With no argument, nil or 0, return the most recent item.
-With numeric argument, return that item.
-With :all, return all clipboard contents in a list."
-  (cond
-   ((null arg) (current-kill 0))
-   ((integerp arg) (current-kill arg))
-   ((eq :all arg) kill-ring)
-   (t nil)))
 
-; test
-; (clipboard-contents)
-; (clipboard-contents 0)
-; (clipboard-contents 9)
-; (clipboard-contents :all)
-
+(defun clipboard-contents ()
+  "Get contents of system clipboard, as opposed to Emacs's kill ring."
+  (x-get-selection-value))
 
 (defun function-get-keys (function)
   "Get list of keys bound to a function, as a string.
-E.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
+e.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
   (mapconcat 'key-description (where-is-internal function) ", "))
 
 ; test
@@ -92,10 +79,10 @@ E.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 ; (function-get-keys 'undo)
 
 
-; used to get path to included sound file
 (defun load-file-directory ()
-  "Get directory of file being loaded."
-  ; load-file-name has full name of current file
+  "Get directory of this file, as it is being loaded."
+  ; used to get path to included sound file
+  ; load-file-name has full path of current file
   (file-name-directory load-file-name))
 
 ; test - load-file-name is normally set by emacs during file load
