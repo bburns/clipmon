@@ -1,4 +1,4 @@
-;;; clipmon.el --- Clipboard monitor - paste contents of clipboard on change.
+;;; clipmon.el --- Clipboard monitor - automatically paste clipboard changes.
 ;;; About:
 
 ;; Copyright (C) 2014 Brian Burns
@@ -12,16 +12,17 @@
 ;; License: MIT
 ;; Created: 2014-02-21
 
+
 ;;; Commentary:
 
+;; Description
+;; 
 ;; Automatically pastes contents of clipboard if change detected after
-;; a certain time interval. 
+;; a certain time interval.
 ;; 
-;; Useful for taking notes from the web - best when paired with an autocopy
-;; feature or plugin for the browser, so can just select text to copy it to the clipboard, e.g.
-;; 
-;; AutoCopy 2 for Firefox
-;; https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
+;; Useful for taking notes from the web. Best when paired with an autocopy
+;; feature or plugin for the browser, so can just select text to copy it to the clipboard.
+;; e.g. AutoCopy 2 for Firefox [1]
 ;;
 ;;
 ;; Usage
@@ -34,11 +35,26 @@
 ;; monitor will turn itself off, or you can call `clipmon-toggle' again to turn it off
 ;; manually.
 ;; 
+;;
 ;; Keybindings
 ;; 
 ;; You can bind `clipmon-toggle' to a key, eg `M-f2', and use this to
-;; start/stop clipmon. Add something like this to your .emacs file: 
+;; start/stop clipmon. Add something like this to your .emacs file:
 ;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
+;;
+;;
+;; Sound
+;;
+;; File: click.wav by Mike Koenig, from SoundBible.com [2]
+;; License: Creative Commons Attribution 3.0 [3]
+;;
+;;
+;; Links
+;;
+;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
+;; [2] http://soundbible.com/783-Click.html
+;; [3] https://creativecommons.org/licenses/by/3.0/us/
+
 
 
 ;;; Todo:
@@ -64,8 +80,13 @@
 (require 's) ; string library
 
 
+; one problem is this seems to remove the contents after calling it, so it changes to nil,
+; which makes clipmon add a blank line. wth?
+; so... if it's nil just bail?
 (defun clipboard-contents ()
-  "Get contents of system clipboard, as opposed to Emacs's kill ring."
+  "Get contents of system clipboard, as opposed to Emacs's kill ring.
+Returns a string, or nil."
+  ; (or (x-get-selection-value) ""))
   (x-get-selection-value))
 
 (defun function-get-keys (function)
@@ -87,22 +108,51 @@ e.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 
 ; test - load-file-name is normally set by emacs during file load
 ; (let ((load-file-name "c:/foo/")) (load-file-directory))
-; (let ((load-file-name "c:/foo/")) (concat (load-file-directory) "ting.wav")) 
+; (let ((load-file-name "c:/foo/")) (concat (load-file-directory) "ting.wav"))
+
+
+(defun seconds-since (time)
+  "Return number of seconds elapsed since the given TIME.
+Valid for up to 2**16 seconds = 65536 secs = 18hrs."
+  (cadr (time-subtract (current-time) time)))
+
+; (setq sometime (current-time))
+; (21648 2846 877000 0)
+; (seconds-since sometime)
+; 166
 
 
 ;;;; Public settings
 
+(defgroup clipmon nil
+  "Options for clipmon package - clipboard monitor."
+  :group 'convenience
+  :group 'killing
+  )
+
 (defcustom clipmon-interval 2
-  "Interval for checking clipboard, in seconds.")
+  "Interval for checking clipboard, in seconds."
+  :group 'clipmon
+  :type 'integer
+  )
 
 (defcustom clipmon-timeout 5
-  "Stop the timer if no clipboard activity after this many minutes. Set to nil for no timeout.")
+  "Stop the timer if no clipboard activity after this many minutes. Set to nil for no timeout."
+  :group 'clipmon
+  :type 'integer
+  )
 
 (defcustom clipmon-trim-string t
-  "Remove leading whitespace from string before pasting.")
+  "Remove leading whitespace from string before pasting."
+  :group 'clipmon
+  :type 'boolean
+  )
 
 (defcustom clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
-  "Regexp to match text to remove before pasting, eg Wikipedia-style references - [3], [12].")
+  "Regexp to match text to remove before pasting, eg Wikipedia-style references - [3], [12]."
+  :group 'clipmon
+  :type 'regexp
+  )
 
 ; test
 ; (setq clipmon-remove-regexp "\\[([0-9]+\\|citation needed)\\]")
@@ -119,23 +169,39 @@ e.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 
 
 (defcustom clipmon-newlines 2
-  "Number of newlines to append after pasting clipboard contents.")
+  "Number of newlines to append after pasting clipboard contents."
+  :group 'clipmon
+  :type 'integer
+  )
 
-(defcustom clipmon-sound (concat (load-file-directory) "ding.wav")
-  "Sound to play when pasting text - t for default beep, nil for none, or path to sound file.")
+(defcustom clipmon-sound (concat (load-file-directory) "click.wav")
+  "Sound to play when pasting text - t for default beep, nil for none, or path to sound file."
+  :group 'clipmon
+  :type 'file
+  )
 ; test
 ; (unbind 'clipmon-sound)
 ; (setq clipmon-sound nil)
 ; (setq clipmon-sound t)
-; (setq clipmon-sound (path-current "ting.wav"))
-; (setq clipmon-sound (path-current "ding.wav"))
 ; (setq clipmon-sound (concat (file-directory) "ting.wav"))
 ; (setq clipmon-sound (concat (file-directory) "ding.wav"))
+; (setq clipmon-sound (concat (file-directory) "click.wav"))
 
 
 (defcustom clipmon-cursor-color "red"
-  "Color to set cursor when clipmon is on. Set to nil for no change.")
+  "Color to set cursor when clipmon is on. Set to nil for no change."
+  :group 'clipmon
+  :type 'color
+  )
 
+
+
+;;;; Private variables
+
+(defvar clipmon--timer nil "Timer handle for clipboard monitor.")
+(defvar clipmon--timeout-start nil "Time that timeout timer was started.")
+(defvar clipmon--previous-contents nil "Last contents of the clipboard.")
+(defvar clipmon--cursor-color-original nil "Original cursor color.")
 
 
 ;;;; Public functions
@@ -146,13 +212,13 @@ e.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
   (if clipmon--timer (clipmon-stop) (clipmon-start)))
 
 
-(defun clipmon-start () 
+(defun clipmon-start ()
   "Start the clipboard monitor timer, and check the clipboard contents each interval."
   (interactive)
   (let ((clipmon-keys (function-get-keys 'clipmon-toggle))) ; eg "<M-f2>, C-0"
     (if clipmon--timer (message "Clipboard monitor already running. Stop with %s." clipmon-keys)
       (setq clipmon--previous-contents (clipboard-contents))
-      (setq clipmon--timeout-start (time))
+      (setq clipmon--timeout-start (current-time))
       (setq clipmon--timer (run-at-time nil clipmon-interval 'clipmon--tick))
       (when clipmon-cursor-color
         (setq clipmon--cursor-color-original (face-background 'cursor))
@@ -163,7 +229,7 @@ e.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
       )))
 
 
-(defun clipmon-stop () 
+(defun clipmon-stop ()
   "Stop the clipboard monitor timer."
   (interactive)
   (cancel-timer clipmon--timer)
@@ -183,24 +249,17 @@ e.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 
 
 ;;;; ------------------------------------------------------------
-;;;; Private variables
-
-(defvar clipmon--timer nil "Timer handle for clipboard monitor.")
-(defvar clipmon--timeout-start nil "Time that timeout timer was started.")
-(defvar clipmon--previous-contents nil "Last contents of the clipboard.")
-(defvar clipmon--cursor-color-original nil "Original cursor color.")
-
-
 ;;;; Private functions
 
 (defun clipmon--tick ()
   "Check the contents of the clipboard - if it has changed, paste the contents."
   (let ((s (clipboard-contents)))
-    (if (not (string-equal s clipmon--previous-contents))
+    (if (and s (not (string-equal s clipmon--previous-contents)))
         (clipmon--paste s)
         ; no change in clipboard - if timeout is set, stop monitor if it's been idle a while
         (if clipmon-timeout
-            (let ((idletime (- (time) clipmon--timeout-start)))
+            ; (let ((idletime (- (time) clipmon--timeout-start)))
+            (let ((idletime (seconds-since clipmon--timeout-start)))
               (when (> idletime (* 60 clipmon-timeout))
                 (clipmon-stop)
                 (message "Clipboard monitor stopped after %d minutes of inactivity." clipmon-timeout)
@@ -209,7 +268,7 @@ e.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 
 
 (defun clipmon--paste (s)
-  "Insert the string at the current location, play sound, and update the state."
+  "Insert the string S at the current location, play sound, and update the state."
   (setq clipmon--previous-contents s)
   (if clipmon-trim-string (setq s (s-trim-left s)))
   ; (if clipmon-remove-wikipedia-references (setq s (replace-regexp-in-string "\\[[0-9]+\\]" "" s)))
@@ -217,7 +276,7 @@ e.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
   (insert s)
   (dotimes (i clipmon-newlines) (insert "\n"))
   (if clipmon-sound (clipmon--play-sound))
-  (setq clipmon--timeout-start (time)))
+  (setq clipmon--timeout-start (current-time)))
 
 
 (defun clipmon--play-sound ()
