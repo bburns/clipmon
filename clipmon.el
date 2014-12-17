@@ -186,12 +186,14 @@ e.g. Wikipedia-style references - [3], [12]."
 ;;;; Public functions
 ; -----------------------------------------------------------------------------
 
+;;;###autoload
 (defun clipmon-toggle ()
   "Turn clipmon on and off."
   (interactive)
   (if clipmon--timer (clipmon-stop) (clipmon-start)))
 
 
+;;;###autoload
 (defun clipmon-start ()
   "Start the clipboard monitor timer, change cursor color, play a sound."
   (interactive)
@@ -215,6 +217,7 @@ e.g. Wikipedia-style references - [3], [12]."
       )))
 
 
+;;;###autoload
 (defun clipmon-stop ()
   "Stop the clipboard monitor timer."
   (interactive)
