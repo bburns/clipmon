@@ -1,9 +1,9 @@
 (source gnu)
-(source melpa)
+(source melpa-stable)
 
 (package-file "clipmon.el")
 
-(files "*.el")
+(files "*.el" "click.wav")
 
 (development
  (depends-on "f")
