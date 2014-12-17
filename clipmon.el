@@ -2,62 +2,77 @@
 ;;; About:
 
 ;; Copyright (C) 2014 Brian Burns
-;; 
+;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
 ;;
 ;; Version: 0.1.20141130
-;; Package-Requires: ((s "0.0.1"))
-;; Keywords: clipboard, paste, autopaste
-;; License: MIT
 ;; Created: 2014-02-21
+;; Package-Requires: ((s "0.0.1"))
+;; Keywords: convenience
+;;
+;;
+;; License: GPLv3
+;; --------------
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ;;; Commentary:
 
 ;; Description
-;; 
+;; -----------
 ;; Automatically pastes contents of clipboard if change detected after
 ;; a certain amount of time.
-;; 
+;;
 ;; Useful for taking notes from the web. Best when paired with an autocopy
 ;; feature or plugin for the browser, so can just select text to copy it to
 ;; the clipboard, e.g. AutoCopy 2 for Firefox [1]
 ;;
 ;;
 ;; Usage
-;;
+;; -----
 ;; Start the monitor with `clipmon-toggle' - it will check the clipboard every
 ;; `clipmon-interval' seconds and paste any new contents at the current
 ;; location. The cursor will change color to indicate the clipboard is being
 ;; monitored.
-;; 
+;;
 ;; If no change is detected after `clipmon-timeout' seconds, the
 ;; monitor will turn itself off, or you can call `clipmon-toggle' again to
 ;; turn it off manually.
 ;;
 ;;
 ;; Keybindings
-;; 
+;; -----------
 ;; You can bind `clipmon-toggle' to a key, eg `M-f2', and use this to
-;; start/stop clipmon. Add something like this to your .emacs file:
-;; 
+;; start/stop clipmon - so add something like this to your .emacs file:
+;;
 ;; (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
 ;;
 ;;
 ;; Customization
-;;
-;; Set the various options here: (customize-group 'clipmon)
+;; -------------
+;; See various options here: (customize-group 'clipmon)
 ;;
 ;;
 ;; Sound
-;;
+;; -----
 ;; File: click.wav by Mike Koenig, from SoundBible.com [2]
 ;; License: Creative Commons Attribution 3.0 [3]
 ;;
 ;;
-;; Links
-;;
+;; References
+;; ----------
 ;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 ;; [2] http://soundbible.com/783-Click.html
 ;; [3] https://creativecommons.org/licenses/by/3.0/us/
@@ -107,7 +122,7 @@ e.g. (get-function-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
 
 
 (defun seconds-since (time)
-  "Return number of seconds elapsed since the given time. 
+  "Return number of seconds elapsed since the given time.
 TIME should be in Emacs time format (see current-time).
 Valid for up to 2**16 seconds = 65536 secs = 18hrs."
   (cadr (time-subtract (current-time) time)))
@@ -144,7 +159,8 @@ t for the default Emacs beep, or nil for none."
   )
 
 (defcustom clipmon-timeout 5
-  "Stop the timer if no clipboard activity after this many minutes. Set to nil for no timeout."
+  "Stop the timer if no clipboard activity after this many minutes.
+Set to nil for no timeout."
   :group 'clipmon
   :type 'integer
   )
