@@ -34,7 +34,7 @@
 ;; If no change is detected after `clipmon-timeout' seconds, the
 ;; monitor will turn itself off, or you can call `clipmon-toggle' again to turn it off
 ;; manually.
-;; 
+;;
 ;;
 ;; Keybindings
 ;; 
@@ -59,16 +59,14 @@
 
 ;;; Todo:
 
-;> only use external clipboard, not emacs one. so can cut/rearrange text while it's running.
-;> preserve echo message? often gets wiped out
-
-;> test with -Q
-;> requirements, package load
-;> make custom group
+; - handle visual beep?
+; - preserve echo message? often gets wiped out
+; - test with -Q
+; - requirements, package load
  
-;> bug - try to start with empty kill ring - gives error on calling current-kill
+; - bug - try to start with empty kill ring - gives error on calling current-kill
 
-;> bug - lost timer
+; - bug - lost timer
 ; when put laptop to sleep with it on, on resuming,
 ; it seemed to lose track of the timer, and couldn't turn it off without
 ; calling (cancel-function-timers 'clipmon--tick)
@@ -80,13 +78,9 @@
 (require 's) ; string library
 
 
-; one problem is this seems to remove the contents after calling it, so it changes to nil,
-; which makes clipmon add a blank line. wth?
-; so... if it's nil just bail?
 (defun clipboard-contents ()
   "Get contents of system clipboard, as opposed to Emacs's kill ring.
 Returns a string, or nil."
-  ; (or (x-get-selection-value) ""))
   (x-get-selection-value))
 
 (defun function-get-keys (function)
@@ -124,8 +118,11 @@ Valid for up to 2**16 seconds = 65536 secs = 18hrs."
 
 ;;;; Public settings
 
+; (customize-group 'clipmon)
+
 (defgroup clipmon nil
-  "Options for clipmon package - clipboard monitor."
+  ; "Customization group for clipmon package (clipboard monitor)."
+  "Clipboard monitor - automatically paste clipboard changes."
   :group 'convenience
   :group 'killing
   )
@@ -143,13 +140,17 @@ Valid for up to 2**16 seconds = 65536 secs = 18hrs."
   )
 
 (defcustom clipmon-trim-string t
-  "Remove leading whitespace from string before pasting."
+  "Remove leading whitespace from string before pasting if non-nil.
+Often it's hard to select text without grabbing a leading space,
+so this will remove it for you."
   :group 'clipmon
   :type 'boolean
   )
 
-(defcustom clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
-  "Regexp to match text to remove before pasting, eg Wikipedia-style references - [3], [12]."
+(defcustom clipmon-remove-regexp
+  "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
+  "Regexp to match text to remove before pasting,
+e.g. Wikipedia-style references - [3], [12]."
   :group 'clipmon
   :type 'regexp
   )
@@ -169,15 +170,17 @@ Valid for up to 2**16 seconds = 65536 secs = 18hrs."
 
 
 (defcustom clipmon-newlines 2
-  "Number of newlines to append after pasting clipboard contents."
+  "Number of newlines to append to clipboard contents before pasting."
   :group 'clipmon
   :type 'integer
   )
 
 (defcustom clipmon-sound (concat (load-file-directory) "click.wav")
-  "Sound to play when pasting text - t for default beep, nil for none, or path to sound file."
+  "Sound to play when pasting text - can be path to a sound file,
+t for the default Emacs beep, or nil for none."
   :group 'clipmon
-  :type 'file
+  ; :type 'file
+  :type '(choice boolean file)
   )
 ; test
 ; (unbind 'clipmon-sound)
@@ -185,7 +188,9 @@ Valid for up to 2**16 seconds = 65536 secs = 18hrs."
 ; (setq clipmon-sound t)
 ; (setq clipmon-sound (concat (file-directory) "ting.wav"))
 ; (setq clipmon-sound (concat (file-directory) "ding.wav"))
-; (setq clipmon-sound (concat (file-directory) "click.wav"))
+; (setq clipmon-sound (concat (file-directory) "click783.wav"))
+; (setq clipmon-sound (concat (file-directory) "click42899.wav"))
+; (setq clipmon-sound (concat (file-directory) "click242429.wav"))
 
 
 (defcustom clipmon-cursor-color "red"
