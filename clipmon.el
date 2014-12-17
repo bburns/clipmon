@@ -42,6 +42,10 @@
 ;; start/stop clipmon. Add something like this to your .emacs file:
 ;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
 ;;
+;; Customize
+;;
+; (customize-group 'clipmon)
+;;
 ;;
 ;; Sound
 ;;
@@ -59,11 +63,12 @@
 
 ;;; Todo:
 
-; - handle visual beep?
-; - preserve echo message? often gets wiped out
 ; - test with -Q
 ; - requirements, package load
- 
+; - remove eol blanks
+
+; - handle visual beep?
+; - preserve echo message? often gets wiped out
 ; - bug - try to start with empty kill ring - gives error on calling current-kill
 
 ; - bug - lost timer
@@ -88,40 +93,22 @@ Returns a string, or nil."
 e.g. (function-get-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
   (mapconcat 'key-description (where-is-internal function) ", "))
 
-; test
-; (function-get-keys 'where-is)
-; (function-get-keys 'ibuffer)
-; (function-get-keys 'undo)
-
 
 (defun load-file-directory ()
   "Get directory of this file, as it is being loaded."
-  ; used to get path to included sound file
-  ; load-file-name has full path of current file
   (file-name-directory load-file-name))
-
-; test - load-file-name is normally set by emacs during file load
-; (let ((load-file-name "c:/foo/")) (load-file-directory))
-; (let ((load-file-name "c:/foo/")) (concat (load-file-directory) "ting.wav"))
 
 
 (defun seconds-since (time)
-  "Return number of seconds elapsed since the given TIME.
+  "Return number of seconds elapsed since the given time. 
+TIME should be in Emacs time format (see current-time).
 Valid for up to 2**16 seconds = 65536 secs = 18hrs."
   (cadr (time-subtract (current-time) time)))
-
-; (setq sometime (current-time))
-; (21648 2846 877000 0)
-; (seconds-since sometime)
-; 166
 
 
 ;;;; Public settings
 
-; (customize-group 'clipmon)
-
 (defgroup clipmon nil
-  ; "Customization group for clipmon package (clipboard monitor)."
   "Clipboard monitor - automatically paste clipboard changes."
   :group 'convenience
   :group 'killing
@@ -155,19 +142,6 @@ e.g. Wikipedia-style references - [3], [12]."
   :type 'regexp
   )
 
-; test
-; (setq clipmon-remove-regexp "\\[([0-9]+\\|citation needed)\\]")
-; (setq clipmon-remove-regexp "\\[[0-9]+\\]")
-; (setq clipmon-remove-regexp "\\[citation needed\\]")
-; (setq clipmon-remove-regexp "\\[[0-9]+\\]\\|\\[citation needed\\]")
-; (replace-regexp-in-string clipmon-remove-regexp "" "Page [37][citation needed]foo.")
-
-; (replace-regexp-in-string  "[0-9]+" ""  "Page[37][foo]1932.")
-; (replace-regexp-in-string  "\\[[0-9]+\\]" ""  "Page[37][foo]1932.")
-; (replace-regexp-in-string  "\\[foo\\]" ""  "Page[37][foo]1932.")
-; (replace-regexp-in-string  "foo\\|37" ""  "Page[37][foo]1932.")
-; (replace-regexp-in-string "\\[[0-9]+\\]" "" "[3] foo [[bar]] [zork] [] [14.0] quirp[37][38][39]. changed[40][41]")
-
 
 (defcustom clipmon-newlines 2
   "Number of newlines to append to clipboard contents before pasting."
@@ -175,22 +149,13 @@ e.g. Wikipedia-style references - [3], [12]."
   :type 'integer
   )
 
+
 (defcustom clipmon-sound (concat (load-file-directory) "click.wav")
   "Sound to play when pasting text - can be path to a sound file,
 t for the default Emacs beep, or nil for none."
   :group 'clipmon
-  ; :type 'file
   :type '(choice boolean file)
   )
-; test
-; (unbind 'clipmon-sound)
-; (setq clipmon-sound nil)
-; (setq clipmon-sound t)
-; (setq clipmon-sound (concat (file-directory) "ting.wav"))
-; (setq clipmon-sound (concat (file-directory) "ding.wav"))
-; (setq clipmon-sound (concat (file-directory) "click783.wav"))
-; (setq clipmon-sound (concat (file-directory) "click42899.wav"))
-; (setq clipmon-sound (concat (file-directory) "click242429.wav"))
 
 
 (defcustom clipmon-cursor-color "red"
@@ -198,7 +163,6 @@ t for the default Emacs beep, or nil for none."
   :group 'clipmon
   :type 'color
   )
-
 
 
 ;;;; Private variables
@@ -245,25 +209,17 @@ t for the default Emacs beep, or nil for none."
   (clipmon--play-sound)
   )
 
-; test
-; (clipmon-start)
-; timer-list
-; (clipmon-stop)
-; (cancel-function-timers 'clipmon--tick)
-
-
 
 ;;;; ------------------------------------------------------------
 ;;;; Private functions
 
 (defun clipmon--tick ()
   "Check the contents of the clipboard - if it has changed, paste the contents."
-  (let ((s (clipboard-contents)))
-    (if (and s (not (string-equal s clipmon--previous-contents)))
+  (let ((s (clipboard-contents))) ; s may actually be nil here
+    (if (and s (not (string-equal s clipmon--previous-contents))) ; if clipboard changed
         (clipmon--paste s)
-        ; no change in clipboard - if timeout is set, stop monitor if it's been idle a while
+        ; else no change. if timeout is set, stop monitor if it's been idle a while
         (if clipmon-timeout
-            ; (let ((idletime (- (time) clipmon--timeout-start)))
             (let ((idletime (seconds-since clipmon--timeout-start)))
               (when (> idletime (* 60 clipmon-timeout))
                 (clipmon-stop)
@@ -276,7 +232,6 @@ t for the default Emacs beep, or nil for none."
   "Insert the string S at the current location, play sound, and update the state."
   (setq clipmon--previous-contents s)
   (if clipmon-trim-string (setq s (s-trim-left s)))
-  ; (if clipmon-remove-wikipedia-references (setq s (replace-regexp-in-string "\\[[0-9]+\\]" "" s)))
   (if clipmon-remove-regexp (setq s (replace-regexp-in-string clipmon-remove-regexp "" s)))
   (insert s)
   (dotimes (i clipmon-newlines) (insert "\n"))
@@ -285,7 +240,7 @@ t for the default Emacs beep, or nil for none."
 
 
 (defun clipmon--play-sound ()
-  "Play a sound file, the default beep, or nothing."
+  "Play a sound file, the default beep (or screen flash), or nothing."
   (if clipmon-sound
       (if (stringp clipmon-sound) (play-sound-file clipmon-sound) (beep))))
 
