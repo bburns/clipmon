@@ -15,14 +15,11 @@
 
 ;;; Commentary:
 
-;; Description
-;; -----------
-;; Automatically pastes contents of clipboard if change detected after
-;; a certain amount of time.
+;; Clipmon monitors the clipboard for changes and inserts its contents 
+;; if a change is detected after a certain amount of time.
 ;;
-;; Can use to take notes from the web, etc. - best when paired with an
+;; Can use to take notes from the web, etc. - best when used with an
 ;; autocopy feature or plugin for the browser, e.g. AutoCopy 2 for Firefox.
-;;
 ;;
 ;; Usage
 ;; -----
@@ -39,28 +36,22 @@
 ;; Note: clipmon only checks the contents of the system clipboard,
 ;; so you can continue to use the Emacs kill-ring as usual.
 ;;
-;;
 ;; Options
 ;; -------
 ;; See all options here: (customize-group 'clipmon)
 ;;
-;;
 ;; Sound file
 ;; ----------
-;; click.wav by Mike Koenig, from http://soundbible.com/783-Click.html
-;; Attribution License https://creativecommons.org/licenses/by/3.0/us/
-;;
+;; click.wav by Mike Koenig (http://soundbible.com/783-Click.html)
+;; Attribution License 3.0 (https://creativecommons.org/licenses/by/3.0/us/)
 ;;
 ;; Todo
 ;; ----
+;; - bug - try to start with empty kill ring - gives error on calling current-kill
 ;; - test with -Q
 ;; - remove eol blanks
-;; - require s here?
-;; - add autorequires
 ;; - package.el
-;; - handle visual beep?
-;; - preserve echo message? often gets wiped out
-;; - bug - try to start with empty kill ring - gives error on calling current-kill
+;; - preserve echo message - often gets wiped out
 ;;
 ;; - bug - lost timer
 ;; when put laptop to sleep with it on, on resuming,
@@ -84,7 +75,6 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 ;;; Code:
 
 (require 's) ; string library
@@ -100,6 +90,7 @@
   :version "24.4"
   )
 
+; ----
 
 (defcustom clipmon-cursor-color "red"
   "Color to set cursor when clipmon is on. Set to nil for no change."
@@ -108,12 +99,11 @@
   )
 
 (defcustom clipmon-sound
-  ; (concat (file-name-directory load-file-name) "ding.wav")
   (concat (file-name-directory (or load-file-name (buffer-file-name))) "ding.wav")
   "Sound to play when pasting text - can be path to a sound file,
 non-nil for the default Emacs beep, or nil for none."
   :group 'clipmon
-  :type '(radio (string :tag "Audio file") (boolean :tag "Default beep")))
+  :type '(radio (string :tag "Audio file") (boolean :tag "Default beep"))
   )
 
 (defcustom clipmon-interval 2
@@ -150,16 +140,6 @@ e.g. Wikipedia-style references - [3], [12]."
   :group 'clipmon
   :type 'integer
   )
-
-
-
-;;;; Private variables
-; -----------------------------------------------------------------------------
-
-(defvar clipmon--timer nil "Timer handle for clipboard monitor.")
-(defvar clipmon--timeout-start nil "Time that timeout timer was started.")
-(defvar clipmon--previous-contents nil "Last contents of the clipboard.")
-(defvar clipmon--cursor-color-original nil "Original cursor color.")
 
 
 
@@ -205,6 +185,16 @@ e.g. Wikipedia-style references - [3], [12]."
   (message "Clipboard monitor stopped.")
   (clipmon--play-sound)
   )
+
+
+
+;;;; Private variables
+; -----------------------------------------------------------------------------
+
+(defvar clipmon--timer nil "Timer handle for clipboard monitor.")
+(defvar clipmon--timeout-start nil "Time that timeout timer was started.")
+(defvar clipmon--previous-contents nil "Last contents of the clipboard.")
+(defvar clipmon--cursor-color-original nil "Original cursor color.")
 
 
 
