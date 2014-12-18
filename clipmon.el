@@ -10,10 +10,66 @@
 ;; Created: 2014-02-21
 ;; Package-Requires: ((s "0.0.1"))
 ;; Keywords: convenience
-;;
-;;
 ;; License: GPLv3
-;; --------------
+
+
+;;; Commentary:
+
+;; Description
+;; -----------
+;; Automatically pastes contents of clipboard if change detected after
+;; a certain amount of time.
+;;
+;; Can use to take notes from the web, etc. - best when paired with an
+;; autocopy feature or plugin for the browser, e.g. AutoCopy 2 for Firefox.
+;;
+;;
+;; Usage
+;; -----
+;; Bind `clipmon-toggle' to a key, eg `M-f2', and use this to
+;; start/stop clipmon:
+;;
+;;   (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
+;;
+;; Once started, it will check the clipboard every `clipmon-interval'
+;; seconds and paste any new contents at the current location.
+;; If no change is detected after `clipmon-timeout' minutes, the
+;; monitor will turn itself off automatically.
+;;
+;; Note: clipmon only checks the contents of the system clipboard,
+;; so you can continue to use the Emacs kill-ring as usual.
+;;
+;;
+;; Options
+;; -------
+;; See all options here: (customize-group 'clipmon)
+;;
+;;
+;; Sound file
+;; ----------
+;; click.wav by Mike Koenig, from http://soundbible.com/783-Click.html
+;; Attribution License https://creativecommons.org/licenses/by/3.0/us/
+;;
+;;
+;; Todo
+;; ----
+;; - test with -Q
+;; - remove eol blanks
+;; - require s here?
+;; - add autorequires
+;; - package.el
+;; - handle visual beep?
+;; - preserve echo message? often gets wiped out
+;; - bug - try to start with empty kill ring - gives error on calling current-kill
+;;
+;; - bug - lost timer
+;; when put laptop to sleep with it on, on resuming,
+;; it seemed to lose track of the timer, and couldn't turn it off without
+;; calling (cancel-function-timers 'clipmon--tick)
+;;
+;;
+;; License
+;; -------
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -28,105 +84,10 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-;;; Commentary:
-
-;; Description
-;; -----------
-;; Automatically pastes contents of clipboard if change detected after
-;; a certain amount of time.
-;;
-;; Useful for taking notes from the web. Best when paired with an autocopy
-;; feature or plugin for the browser, so can just select text to copy it to
-;; the clipboard, e.g. AutoCopy 2 for Firefox [1]
-;;
-;;
-;; Usage
-;; -----
-;; Start the monitor with `clipmon-toggle' - it will check the clipboard every
-;; `clipmon-interval' seconds and paste any new contents at the current
-;; location. The cursor will change color to indicate the clipboard is being
-;; monitored.
-;;
-;; If no change is detected after `clipmon-timeout' seconds, the
-;; monitor will turn itself off, or you can call `clipmon-toggle' again to
-;; turn it off manually.
-;;
-;;
-;; Keybindings
-;; -----------
-;; You can bind `clipmon-toggle' to a key, eg `M-f2', and use this to
-;; start/stop clipmon - so add something like this to your .emacs file:
-;;
-;; (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
-;;
-;;
-;; Customization
-;; -------------
-;; See various options here: (customize-group 'clipmon)
-;;
-;;
-;; Sound
-;; -----
-;; File: click.wav by Mike Koenig, from SoundBible.com [2]
-;; License: Creative Commons Attribution 3.0 [3]
-;;
-;;
-;; References
-;; ----------
-;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
-;; [2] http://soundbible.com/783-Click.html
-;; [3] https://creativecommons.org/licenses/by/3.0/us/
-
-
-
-;;; Todo:
-
-; - test with -Q
-; - requirements, package load
-; - remove eol blanks
-; - require s here?
-; - add autorequires
-
-; - handle visual beep?
-; - preserve echo message? often gets wiped out
-; - bug - try to start with empty kill ring - gives error on calling current-kill
-
-; - bug - lost timer
-; when put laptop to sleep with it on, on resuming,
-; it seemed to lose track of the timer, and couldn't turn it off without
-; calling (cancel-function-timers 'clipmon--tick)
-
 
 ;;; Code:
-;;;; Library functions
-; -----------------------------------------------------------------------------
 
 (require 's) ; string library
-
-
-(defun clipboard-contents ()
-  "Get contents of system clipboard, as opposed to Emacs's kill ring.
-Returns a string, or nil."
-  (x-get-selection-value))
-
-
-(defun get-function-keys (function)
-  "Get list of keys bound to a function, as a string.
-e.g. (get-function-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
-  (mapconcat 'key-description (where-is-internal function) ", "))
-
-
-(defun load-file-directory ()
-  "Get directory of this file, as it is being loaded."
-  (file-name-directory load-file-name))
-
-
-(defun seconds-since (time)
-  "Return number of seconds elapsed since the given time.
-TIME should be in Emacs time format (see current-time).
-Valid for up to 2**16 seconds = 65536 secs = 18hrs."
-  (cadr (time-subtract (current-time) time)))
-
 
 
 ;;;; Public settings
@@ -136,6 +97,7 @@ Valid for up to 2**16 seconds = 65536 secs = 18hrs."
   "Clipboard monitor - automatically paste clipboard changes."
   :group 'convenience
   :group 'killing
+  :version "24.4"
   )
 
 
@@ -145,11 +107,13 @@ Valid for up to 2**16 seconds = 65536 secs = 18hrs."
   :type 'color
   )
 
-(defcustom clipmon-sound (concat (load-file-directory) "click.wav")
+(defcustom clipmon-sound
+  ; (concat (file-name-directory load-file-name) "ding.wav")
+  (concat (file-name-directory (or load-file-name (buffer-file-name))) "ding.wav")
   "Sound to play when pasting text - can be path to a sound file,
-t for the default Emacs beep, or nil for none."
+non-nil for the default Emacs beep, or nil for none."
   :group 'clipmon
-  :type '(choice boolean file)
+  :type '(radio (string :tag "Audio file") (boolean :tag "Default beep")))
   )
 
 (defcustom clipmon-interval 2
@@ -209,7 +173,6 @@ e.g. Wikipedia-style references - [3], [12]."
   (if clipmon--timer (clipmon-stop) (clipmon-start)))
 
 
-;;;###autoload
 (defun clipmon-start ()
   "Start the clipboard monitor timer, change cursor color, play a sound."
   (interactive)
@@ -225,7 +188,6 @@ e.g. Wikipedia-style references - [3], [12]."
         (setq clipmon--cursor-color-original (face-background 'cursor))
         (set-face-background 'cursor clipmon-cursor-color)
         )
-      ; message
       (message
        "Clipboard monitor started with timer interval %d seconds. Stop with %s."
        clipmon-interval clipmon-keys)
@@ -233,7 +195,6 @@ e.g. Wikipedia-style references - [3], [12]."
       )))
 
 
-;;;###autoload
 (defun clipmon-stop ()
   "Stop the clipboard monitor timer."
   (interactive)
@@ -283,6 +244,29 @@ e.g. Wikipedia-style references - [3], [12]."
   "Play a sound file, the default beep (or screen flash), or nothing."
   (if clipmon-sound
       (if (stringp clipmon-sound) (play-sound-file clipmon-sound) (beep))))
+
+
+
+;;;; Library functions
+; -----------------------------------------------------------------------------
+
+(defun clipboard-contents ()
+  "Get contents of system clipboard, as opposed to Emacs's kill ring.
+Returns a string, or nil."
+  (x-get-selection-value))
+
+
+(defun get-function-keys (function)
+  "Get list of keys bound to a function, as a string.
+e.g. (get-function-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
+  (mapconcat 'key-description (where-is-internal function) ", "))
+
+
+(defun seconds-since (time)
+  "Return number of seconds elapsed since the given time.
+TIME should be in Emacs time format (see current-time).
+Valid for up to 2**16 seconds = 65536 secs = 18hrs."
+  (cadr (time-subtract (current-time) time)))
 
 
 ;;;; Provide
