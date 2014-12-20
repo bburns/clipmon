@@ -1,4 +1,4 @@
-;;; clipmon.el --- Clipboard monitor - automatically paste clipboard changes.
+;;; clipmon.el --- Clipboard monitor - automatically pastes clipboard changes.
 ;;; About:
 
 ;; Copyright (C) 2014 Brian Burns
@@ -6,7 +6,7 @@
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
 ;;
-;; Version: 0.1.20141130
+;; Version: 0.1.20141219
 ;; Created: 2014-02-21
 ;; Package-Requires: ((s "0.0.1"))
 ;; Keywords: convenience
@@ -18,36 +18,36 @@
 ;; Clipmon
 ;; =======
 ;;
-;; Clipmon is a clipboard monitor - it detects changes to the clipboard and
-;; pastes the contents into the current location.
+;; Clipmon monitors the system clipboard and pastes any changes into the current
+;; location in Emacs.
 ;;
-;; This makes it easier to take notes from a webpage, for example, by just
-;; copying text you wish to save. This works well when paired with an autocopy
-;; feature or plugin for the browser, e.g. AutoCopy 2 for Firefox.
+;; This makes it easier to take notes from a webpage, for example - just copy
+;; the text you wish to save. You can continue to use the Emacs kill-ring with
+;; yank and pull as usual, as clipmon only looks at the system clipboard.
 ;;
-;; You can continue to use the Emacs kill-ring with yank and pull as usual,
-;; since clipmon only looks at the system clipboard, as used by other
-;; applications.
+;; Works best when paired with an autocopy feature or plugin for the browser,
+;; e.g. AutoCopy 2 for Firefox - then you can just select some text to copy it
+;; to the clipboard.
 ;;
 ;;
 ;; Usage
 ;; -----
 ;; Make a keybinding like the following to turn clipmon on and off: 
 ;;
-;;   (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
+;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
 ;;
-;; Turn it on, then go to another application, e.g. a browser, and copy some
-;; text to the clipboard. Clipmon should detect it after a second or two, and
-;; make a sound - if you switch back to Emacs, it should have pasted the text
-;; into your buffer. 
+;; Turn clipmon on, then go to another application, e.g. your browser, and copy
+;; some text to the clipboard. Clipmon should detect it after a second or two,
+;; and make a sound. If you switch back to Emacs, it should have pasted the text
+;; into your buffer. Turn if on and off as you need.
 ;;
 ;;
 ;; Options
 ;; -------
 ;;
-;; Once started, Clipmon checks the clipboard for changes every
+;; Once started, clipmon checks the clipboard for changes every
 ;; `clipmon-interval' seconds. If no change is detected after `clipmon-timeout'
-;; minutes, the monitor will turn itself off automatically.
+;; minutes, clipmon will turn itself off automatically.
 ;;
 ;; The cursor color can be set with `clipmon-cursor-color' - eg "red", or nil
 ;; for no change. 
@@ -57,16 +57,16 @@
 ;; t for the default Emacs beep/flash, or nil for no sound.
 ;;
 ;; When selecting text to copy, it's sometimes difficult to avoid grabbing a
-;; leading space - to remove these from the text before pasting, set
-;; `clipmon-trim-string' to t (on by default).
+;; leading space - to remove these from the text, set `clipmon-trim-string' to t
+;; (on by default).
 ;;
-;; To filter the text more set `clipmon-remove-regexp' - it will remove any
-;; matching text before pasting. By default it is set up to to remove
-;; Wikipedia-style references, e.g. "[3]".
+;; To filter the text some more set `clipmon-remove-regexp' - it will remove any
+;; matching text before pasting. By default it is set to remove Wikipedia-style
+;; references, e.g. "[3]".
 ;;
 ;; You can also have newlines appended to the text - specify the number to add
 ;; with `clipmon-newlines'. The default is 2, giving a blank line between each
-;; clip.
+;; paste.
 ;;
 ;;
 ;; See all options here: (customize-group 'clipmon)
@@ -169,6 +169,16 @@ e.g. Wikipedia-style references - [3], [12]."
 
 
 
+;;;; Private variables
+; -----------------------------------------------------------------------------
+
+(defvar clipmon--timer nil "Timer handle for clipboard monitor.")
+(defvar clipmon--timeout-start nil "Time that timeout timer was started.")
+(defvar clipmon--previous-contents nil "Last contents of the clipboard.")
+(defvar clipmon--cursor-color-original nil "Original cursor color.")
+
+
+
 ;;;; Public functions
 ; -----------------------------------------------------------------------------
 
@@ -214,21 +224,12 @@ e.g. Wikipedia-style references - [3], [12]."
 
 
 
-;;;; Private variables
-; -----------------------------------------------------------------------------
-
-(defvar clipmon--timer nil "Timer handle for clipboard monitor.")
-(defvar clipmon--timeout-start nil "Time that timeout timer was started.")
-(defvar clipmon--previous-contents nil "Last contents of the clipboard.")
-(defvar clipmon--cursor-color-original nil "Original cursor color.")
-
-
-
 ;;;; Private functions
 ; -----------------------------------------------------------------------------
 
 (defun clipmon--tick ()
-  "Check the contents of the clipboard - if it has changed, paste the contents."
+  "Check the contents of the clipboard - if it has changed, paste the contents.
+Otherwise stop clipmon if it's been idle a while."
   (let ((s (clipboard-contents))) ; s may actually be nil here
     (if (and s (not (string-equal s clipmon--previous-contents))) ; if changed
         (clipmon--paste s)
@@ -246,14 +247,14 @@ e.g. Wikipedia-style references - [3], [12]."
 
 (defun clipmon--paste (s)
   "Insert the string S at the current location, play sound, update state."
-  (setq clipmon--previous-contents s)
+  (setq clipmon--previous-contents s) ; save contents
   (if clipmon-trim-string (setq s (s-trim-left s)))
   (if clipmon-remove-regexp
       (setq s (replace-regexp-in-string clipmon-remove-regexp "" s)))
-  (insert s)
+  (insert s) ; paste it
   (dotimes (i clipmon-newlines) (insert "\n"))
   (if clipmon-sound (clipmon--play-sound))
-  (setq clipmon--timeout-start (current-time)))
+  (setq clipmon--timeout-start (current-time))) ; restart timeout timer
 
 
 (defun clipmon--play-sound ()

@@ -3,7 +3,7 @@
 
 (package-file "clipmon.el")
 
-(files "*.el" "click.wav")
+(files "*.el" "ding.wav")
 
 (development
  (depends-on "f")
