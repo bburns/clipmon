@@ -1,22 +1,22 @@
 ;;; clipmon.el --- Clipboard monitor - automatically pastes clipboard changes.
 ;;; About:
-
+;;
 ;; Copyright (C) 2014 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
-;; URL: https://github.com/bburns/clipmon
+;; Homepage: https://github.com/bburns/clipmon
 ;;
 ;; Version: 0.1.20141219
-;; Created: 2014-02-21
-;; Package-Requires: ((s "0.0.1"))
 ;; Keywords: convenience
+;; Created: 2014-02-21
 ;; License: GPLv3
-
-
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;
 ;;; Commentary:
-
-;; Clipmon
-;; =======
+;;
+;;;; Description
 ;;
 ;; Clipmon monitors the system clipboard and pastes any changes into the current
 ;; location in Emacs.
@@ -30,9 +30,9 @@
 ;; to the clipboard.
 ;;
 ;;
-;; Usage
-;; -----
-;; Make a keybinding like the following to turn clipmon on and off: 
+;;;; Usage
+;;
+;; Make a keybinding like the following to turn clipmon on and off:
 ;;
 ;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
 ;;
@@ -42,15 +42,14 @@
 ;; into your buffer. Turn if on and off as you need.
 ;;
 ;;
-;; Options
-;; -------
+;;;; Options
 ;;
 ;; Once started, clipmon checks the clipboard for changes every
 ;; `clipmon-interval' seconds. If no change is detected after `clipmon-timeout'
 ;; minutes, clipmon will turn itself off automatically.
 ;;
 ;; The cursor color can be set with `clipmon-cursor-color' - eg "red", or nil
-;; for no change. 
+;; for no change.
 ;;
 ;; A sound is played on each change, and on starting and stopping clipmon. The
 ;; sound can be set with `clipmon-sound' - this can be a filename (.wav or .au),
@@ -72,8 +71,8 @@
 ;; See all options here: (customize-group 'clipmon)
 ;;
 ;;
-;; Todo
-;; ----
+;;;; Todo
+;;
 ;; - bug - try to start with empty kill ring - gives error on calling
 ;;   current-kill
 ;; - test with -Q
@@ -85,8 +84,8 @@
 ;;   calling (cancel-function-timers 'clipmon--tick)
 ;;
 ;;
-;; License
-;; -------
+;;;; License
+;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -99,12 +98,9 @@
 ;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
+;;
+;;
 ;;; Code:
-
-(require 's) ; string library
-
 
 ;;;; Public settings
 ; -----------------------------------------------------------------------------
@@ -126,8 +122,8 @@
 
 (defcustom clipmon-sound
   (concat (file-name-directory (or load-file-name (buffer-file-name))) "ding.wav")
-  "Sound to play when pasting text - can be path to a sound file,
-non-nil for the default Emacs beep, or nil for none."
+  "Sound to play when pasting text - can be path to a sound file, t, or nil.
+Use t for the default Emacs beep, or nil for none. Can play .wav or .au files."
   :group 'clipmon
   :type '(radio (string :tag "Audio file") (boolean :tag "Default beep"))
   )
@@ -155,7 +151,7 @@ so this will remove it for you."
 
 (defcustom clipmon-remove-regexp
   "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
-  "Regexp to match text to remove before pasting,
+  "Any text matching this regexp will be removed before pasting.
 e.g. Wikipedia-style references - [3], [12]."
   :group 'clipmon
   :type 'regexp
@@ -248,7 +244,7 @@ Otherwise stop clipmon if it's been idle a while."
 (defun clipmon--paste (s)
   "Insert the string S at the current location, play sound, update state."
   (setq clipmon--previous-contents s) ; save contents
-  (if clipmon-trim-string (setq s (s-trim-left s)))
+  (if clipmon-trim-string (setq s (trim-left s)))
   (if clipmon-remove-regexp
       (setq s (replace-regexp-in-string clipmon-remove-regexp "" s)))
   (insert s) ; paste it
@@ -275,13 +271,18 @@ Returns a string, or nil."
 
 (defun get-function-keys (function)
   "Get list of keys bound to a function, as a string.
-e.g. (get-function-keys 'ibuffer) => 'C-x C-b, <menu-bar>...'"
+e.g. (get-function-keys 'ibuffer) => \"C-x C-b, <menu-bar>...\""
   (mapconcat 'key-description (where-is-internal function) ", "))
+
+
+(defun trim-left (s)
+  "Remove any leading spaces from S."
+  (replace-regexp-in-string  "^[ \t]+"  ""  s))
 
 
 (defun seconds-since (time)
   "Return number of seconds elapsed since the given time.
-TIME should be in Emacs time format (see current-time).
+Time should be in Emacs time format (see `current-time').
 Valid for up to 2**16 seconds = 65536 secs = 18hrs."
   (cadr (time-subtract (current-time) time)))
 
