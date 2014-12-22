@@ -45,8 +45,8 @@
 ;;;; Options
 ;;
 ;; Once started, clipmon checks the clipboard for changes every
-;; `clipmon-interval' seconds (default 2 secs). If no change is detected after
-;; `clipmon-timeout' minutes (default 5 mins), clipmon will turn itself off
+;; `clipmon-interval' seconds (default 2). If no change is detected after
+;; `clipmon-timeout' minutes (default 5), clipmon will turn itself off
 ;; automatically.
 ;;
 ;; The cursor color can be set with `clipmon-cursor-color' - eg "red", or nil
@@ -73,7 +73,6 @@
 ;;
 ;;;; Todo
 ;;
-;; - trim to n cols. 75?
 ;; - bug - try to start with empty kill ring - gives error on calling
 ;;   current-kill
 ;; - test with -Q
@@ -113,7 +112,7 @@
   :version "24.4"
   )
 
-; ----
+; --
 
 (defcustom clipmon-cursor-color "red"
   "Color to set cursor when clipmon is on. Set to nil for no change."
@@ -121,11 +120,9 @@
   :type 'color
   )
 
-(defcustom clipmon-sound
-  (concat (file-name-directory (or load-file-name (buffer-file-name))) "ding.wav")
-  "Sound to play when pasting text: path to a sound file, t, or nil.
-Use t for the default Emacs beep, or nil for none. Can play .wav
-or .au files."
+(defcustom clipmon-sound t
+  "Sound to play when pasting text: path to a sound file, t for beep, or nil.
+Use t for the default Emacs beep, or nil for none. Can play .wav or .au files."
   :group 'clipmon
   :type '(radio (string :tag "Audio file") (boolean :tag "Default beep"))
   )
