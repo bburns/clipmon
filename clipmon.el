@@ -6,7 +6,7 @@
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; Homepage: https://github.com/bburns/clipmon
 ;;
-;; Version: 0.1.20141219
+;; Version: 0.1.20141223
 ;; Keywords: convenience
 ;; Created: 2014-02-21
 ;; License: GPLv3
@@ -17,13 +17,14 @@
 ;;; Commentary:
 ;;
 ;;;; Description
+;; ----------------------------------------------------------------------------
 ;;
 ;; Clipmon monitors the system clipboard and pastes any changes into the current
 ;; location in Emacs.
 ;;
 ;; This makes it easier to take notes from a webpage, for example - just copy
-;; the text you wish to save. You can still use the Emacs kill-ring with yank
-;; and pull as usual, as clipmon only looks at the system clipboard.
+;; the text you want to save. You can still use the Emacs kill-ring with yank
+;; and pull as usual, since clipmon only looks at the system clipboard.
 ;;
 ;; Works best when paired with an autocopy feature or plugin for the browser,
 ;; e.g. AutoCopy 2 for Firefox - then you can just select text to copy it to the
@@ -31,18 +32,20 @@
 ;;
 ;;
 ;;;; Usage
+;; ----------------------------------------------------------------------------
 ;;
 ;; Make a key-binding like the following to turn clipmon on and off:
 ;;
 ;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
 ;;
 ;; Then turn it on and go to another application, like a browser, and copy some
-;; text to the clipboard. Clipmon should detect it after a second or two, and
+;; text to the clipboard - clipmon should detect it after a second or two, and
 ;; make a sound. If you switch back to Emacs, it should have pasted the text
 ;; into your buffer.
 ;;
 ;;
 ;;;; Options
+;; ----------------------------------------------------------------------------
 ;;
 ;; Once started, clipmon checks the clipboard for changes every
 ;; `clipmon-interval' seconds (default 2). If no change is detected after
@@ -64,27 +67,21 @@
 ;; matching text before pasting. By default it is set to remove Wikipedia-style
 ;; references, e.g. "[3]".
 ;;
-;; You can also have newlines appended to the text - specify the number to add
-;; with `clipmon-newlines'. The default is 2, giving a blank line between
-;; entries.
+;; You can specify strings to add to the start and end of the text, with
+;; `clipmon-prefix' and `clipmon-suffix'. By default the suffix is set to two
+;; newlines, which will leave a blank line in between entries.
+;;
+;; For more customization, set `clipmon-transform-function' to a function that
+;; takes the clipboard text and returns a modified version - e.g. to reverse the
+;; text before pasting,
+;;    (defun foo (s) (s-reverse s))
+;;    (setq clipmon-transform-function 'foo)
 ;;
 ;; See all options here: (customize-group 'clipmon)
 ;;
 ;;
-;;;; Todo
-;;
-;; - bug - try to start with empty kill ring - gives error on calling
-;;   current-kill
-;; - test with -Q
-;; - package.el
-;; - preserve echo message - often gets wiped out
-;; - bug - lost timer
-;;   when put laptop to sleep with it on, on resuming,
-;;   it seemed to lose track of the timer, and couldn't turn it off without
-;;   calling (cancel-function-timers 'clipmon--tick)
-;;
-;;
 ;;;; License
+;; ----------------------------------------------------------------------------
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -101,7 +98,6 @@
 ;;
 ;;
 ;;; Code:
-
 ;;;; Public settings
 ; -----------------------------------------------------------------------------
 
@@ -121,10 +117,26 @@
   )
 
 (defcustom clipmon-sound t
-  "Sound to play when pasting text: path to a sound file, t for beep, or nil.
-Use t for the default Emacs beep, or nil for none. Can play .wav or .au files."
+  "Path to sound file to play on paste, t for included file, or nil.
+Use t for the included sound file (see
+`clipmon--included-sound-file'), nil for no sound, or path to an
+audio file - Emacs can play .wav or .au files."
+  ; Note: can't use `ding' here because it doesn't make a sound when Emacs
+  ; doesn't have focus.
   :group 'clipmon
-  :type '(radio (string :tag "Audio file") (boolean :tag "Default beep"))
+  :type '(radio
+          (string :tag "Audio file (.wav or .au)")
+          (boolean :tag "Included sound file"))
+  )
+
+(defcustom clipmon-transform-function nil
+  "Function to perform additional transformations on the clipboard text.
+Receives one argument, the clipboard text - should return the changed text.
+E.g. to reverse the text before pasting,
+    (defun foo (s) (s-reverse s))
+    (setq clipmon-filter-function 'foo)"
+  :group 'clipmon
+  :type 'function
   )
 
 (defcustom clipmon-interval 2
@@ -156,10 +168,17 @@ e.g. Wikipedia-style references - [3], [12]."
   :type 'regexp
   )
 
-(defcustom clipmon-newlines 2
-  "Number of newlines to append to text before pasting."
+(defcustom clipmon-suffix "\n\n"
+  "String to append to clipboard contents before pasting.
+Default is two newlines, which leaves a blank line in between pastes."
   :group 'clipmon
-  :type 'integer
+  :type 'string
+  )
+
+(defcustom clipmon-prefix ""
+  "String to add to start of clipboard contents before pasting."
+  :group 'clipmon
+  :type 'string
   )
 
 
@@ -172,6 +191,10 @@ e.g. Wikipedia-style references - [3], [12]."
 (defvar clipmon--previous-contents nil "Last contents of the clipboard.")
 (defvar clipmon--cursor-color-original nil "Original cursor color.")
 
+(defconst clipmon--included-sound-file
+    (concat (file-name-directory (or load-file-name (buffer-file-name))) "ding.wav")
+    "Path to the included audio file.")
+
 
 
 ;;;; Public functions
@@ -179,7 +202,7 @@ e.g. Wikipedia-style references - [3], [12]."
 
 ;;;###autoload
 (defun clipmon-toggle ()
-  "Turn clipmon on and off (clipboard monitor/autopaste)."
+  "Turn clipmon (clipboard monitor) on and off."
   (interactive)
   (if clipmon--timer (clipmon-stop) (clipmon-start)))
 
@@ -193,12 +216,12 @@ e.g. Wikipedia-style references - [3], [12]."
       ; initialize
       (setq clipmon--previous-contents (clipboard-contents))
       (setq clipmon--timeout-start (current-time))
-      (setq clipmon--timer (run-at-time nil clipmon-interval 'clipmon--tick))
+      (setq clipmon--timer
+            (run-at-time nil clipmon-interval 'clipmon--check-clipboard))
       ; change cursor color
       (when clipmon-cursor-color
         (setq clipmon--cursor-color-original (face-background 'cursor))
-        (set-face-background 'cursor clipmon-cursor-color)
-        )
+        (set-face-background 'cursor clipmon-cursor-color))
       (message
        "Clipboard monitor started with timer interval %d seconds. Stop with %s."
        clipmon-interval clipmon-keys)
@@ -207,7 +230,7 @@ e.g. Wikipedia-style references - [3], [12]."
 
 
 (defun clipmon-stop ()
-  "Stop the clipboard monitor timer."
+  "Stop the clipboard monitor timer, restore cursor, and play a sound."
   (interactive)
   (cancel-timer clipmon--timer)
   (setq clipmon--timer nil)
@@ -222,12 +245,12 @@ e.g. Wikipedia-style references - [3], [12]."
 ;;;; Private functions
 ; -----------------------------------------------------------------------------
 
-(defun clipmon--tick ()
-  "Check the contents of the clipboard and paste it if changed.
+(defun clipmon--check-clipboard ()
+  "Check the clipboard and insert contents if changed.
 Otherwise stop clipmon if it's been idle a while."
   (let ((s (clipboard-contents))) ; s may actually be nil here
     (if (and s (not (string-equal s clipmon--previous-contents))) ; if changed
-        (clipmon--paste s)
+        (clipmon--clipboard-changed s)
         ; otherwise stop monitor if it's been idle a while
         (if clipmon-timeout
             (let ((idletime (seconds-since clipmon--timeout-start)))
@@ -240,22 +263,26 @@ Otherwise stop clipmon if it's been idle a while."
         )))
 
 
-(defun clipmon--paste (s)
-  "Insert the string s at the current location, play sound, update state."
+(defun clipmon--clipboard-changed (s)
+  "Clipboard changed - transform text, insert it, play sound, update state."
   (setq clipmon--previous-contents s) ; save contents
   (if clipmon-trim-string (setq s (trim-left s)))
   (if clipmon-remove-regexp
       (setq s (replace-regexp-in-string clipmon-remove-regexp "" s)))
+  (if clipmon-prefix (setq s (concat clipmon-prefix s)))
+  (if clipmon-suffix (setq s (concat s clipmon-suffix)))
+  (if clipmon-transform-function (setq s (funcall clipmon-transform-function s)))
   (insert s) ; paste it
-  (dotimes (i clipmon-newlines) (insert "\n"))
-  (if clipmon-sound (clipmon--play-sound))
+  (clipmon--play-sound)
   (setq clipmon--timeout-start (current-time))) ; restart timeout timer
 
 
 (defun clipmon--play-sound ()
-  "Play a sound file, the default beep (or screen flash), or nothing."
+  "Play a user-specified sound file, the included sound file, or nothing."
   (if clipmon-sound
-      (if (stringp clipmon-sound) (play-sound-file clipmon-sound) (beep))))
+      (if (stringp clipmon-sound)
+          (play-sound-file clipmon-sound)
+          (play-sound-file clipmon--included-sound-file))))
 
 
 
