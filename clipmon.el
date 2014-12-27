@@ -6,7 +6,7 @@
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; Homepage: https://github.com/bburns/clipmon
 ;;
-;; Version: 0.1.20141223
+;; Version: 0.1.20141227
 ;; Keywords: convenience
 ;; Created: 2014-02-21
 ;; License: GPLv3
@@ -56,8 +56,8 @@
 ;; for no change.
 ;;
 ;; A sound can be played on each change, and on starting and stopping clipmon.
-;; The sound can be set with `clipmon-sound' - this can be a filename (.wav or
-;; .au), t for the default Emacs beep/flash, or nil for no sound.
+;; The sound can be set with `clipmon-sound' - this can be t for the included
+;; ding.wav file, a path to a sound file (.wav or .au), or nil for no sound.
 ;;
 ;; When selecting text to copy, it's sometimes difficult to avoid grabbing a
 ;; leading space - to remove these from the text, set `clipmon-trim-string' to t
@@ -72,10 +72,9 @@
 ;; newlines, which will leave a blank line in between entries.
 ;;
 ;; For more customization, set `clipmon-transform-function' to a function that
-;; takes the clipboard text and returns a modified version - e.g. to reverse the
-;; text before pasting,
-;;    (defun foo (s) (s-reverse s))
-;;    (setq clipmon-transform-function 'foo)
+;; takes the clipboard text and returns a modified version - e.g. to make the
+;; text lowercase before pasting,
+;;    (setq clipmon-transform-function (lambda (s) (downcase s)))
 ;;
 ;; See all options here: (customize-group 'clipmon)
 ;;
@@ -98,8 +97,9 @@
 ;;
 ;;
 ;;; Code:
+;;
 ;;;; Public settings
-; -----------------------------------------------------------------------------
+;; ----------------------------------------------------------------------------
 
 (defgroup clipmon nil
   "Clipboard monitor - automatically paste clipboard changes."
@@ -108,7 +108,6 @@
   :version "24.4"
   )
 
-; --
 
 (defcustom clipmon-cursor-color "red"
   "Color to set cursor when clipmon is on. Set to nil for no change."
@@ -129,16 +128,6 @@ audio file - Emacs can play .wav or .au files."
           (boolean :tag "Included sound file"))
   )
 
-(defcustom clipmon-transform-function nil
-  "Function to perform additional transformations on the clipboard text.
-Receives one argument, the clipboard text - should return the changed text.
-E.g. to reverse the text before pasting,
-    (defun foo (s) (s-reverse s))
-    (setq clipmon-filter-function 'foo)"
-  :group 'clipmon
-  :type 'function
-  )
-
 (defcustom clipmon-interval 2
   "Interval for checking clipboard, in seconds."
   :group 'clipmon
@@ -152,10 +141,13 @@ Set to nil for no timeout."
   :type 'integer
   )
 
+
+;; transforms on text - these are performed in this order
+
 (defcustom clipmon-trim-string t
   "Remove leading whitespace from string before pasting if non-nil.
 Often it's hard to select text without grabbing a leading space,
-so this will remove it for you."
+so this will remove it."
   :group 'clipmon
   :type 'boolean
   )
@@ -168,6 +160,12 @@ e.g. Wikipedia-style references - [3], [12]."
   :type 'regexp
   )
 
+(defcustom clipmon-prefix ""
+  "String to add to start of clipboard contents before pasting."
+  :group 'clipmon
+  :type 'string
+  )
+
 (defcustom clipmon-suffix "\n\n"
   "String to append to clipboard contents before pasting.
 Default is two newlines, which leaves a blank line in between pastes."
@@ -175,16 +173,19 @@ Default is two newlines, which leaves a blank line in between pastes."
   :type 'string
   )
 
-(defcustom clipmon-prefix ""
-  "String to add to start of clipboard contents before pasting."
+(defcustom clipmon-transform-function nil
+  "Function to perform additional transformations on the clipboard text.
+Receives one argument, the clipboard text - should return the changed text.
+E.g. to make the text lowercase before pasting,
+    (setq clipmon-transform-function (lambda (s) (downcase s)))"
   :group 'clipmon
-  :type 'string
+  :type 'function
   )
 
 
 
 ;;;; Private variables
-; -----------------------------------------------------------------------------
+;; ----------------------------------------------------------------------------
 
 (defvar clipmon--timer nil "Timer handle for clipboard monitor.")
 (defvar clipmon--timeout-start nil "Time that timeout timer was started.")
@@ -198,7 +199,7 @@ Default is two newlines, which leaves a blank line in between pastes."
 
 
 ;;;; Public functions
-; -----------------------------------------------------------------------------
+;; ----------------------------------------------------------------------------
 
 ;;;###autoload
 (defun clipmon-toggle ()
@@ -230,7 +231,7 @@ Default is two newlines, which leaves a blank line in between pastes."
 
 
 (defun clipmon-stop ()
-  "Stop the clipboard monitor timer, restore cursor, and play a sound."
+  "Stop the clipboard timer, restore cursor, and play a sound."
   (interactive)
   (cancel-timer clipmon--timer)
   (setq clipmon--timer nil)
@@ -243,14 +244,14 @@ Default is two newlines, which leaves a blank line in between pastes."
 
 
 ;;;; Private functions
-; -----------------------------------------------------------------------------
+;; ----------------------------------------------------------------------------
 
 (defun clipmon--check-clipboard ()
   "Check the clipboard and insert contents if changed.
 Otherwise stop clipmon if it's been idle a while."
   (let ((s (clipboard-contents))) ; s may actually be nil here
     (if (and s (not (string-equal s clipmon--previous-contents))) ; if changed
-        (clipmon--clipboard-changed s)
+        (clipmon--on-clipboard-change s)
         ; otherwise stop monitor if it's been idle a while
         (if clipmon-timeout
             (let ((idletime (seconds-since clipmon--timeout-start)))
@@ -263,18 +264,24 @@ Otherwise stop clipmon if it's been idle a while."
         )))
 
 
-(defun clipmon--clipboard-changed (s)
+(defun clipmon--on-clipboard-change (s)
   "Clipboard changed - transform text, insert it, play sound, update state."
   (setq clipmon--previous-contents s) ; save contents
+  (setq s (clipmon--transform-text s))
+  (insert s)
+  (clipmon--play-sound)
+  (setq clipmon--timeout-start (current-time))) ; restart timeout timer
+
+
+(defun clipmon--transform-text (s)
+  "Apply transformations to clipboard text."
   (if clipmon-trim-string (setq s (trim-left s)))
   (if clipmon-remove-regexp
       (setq s (replace-regexp-in-string clipmon-remove-regexp "" s)))
   (if clipmon-prefix (setq s (concat clipmon-prefix s)))
   (if clipmon-suffix (setq s (concat s clipmon-suffix)))
   (if clipmon-transform-function (setq s (funcall clipmon-transform-function s)))
-  (insert s) ; paste it
-  (clipmon--play-sound)
-  (setq clipmon--timeout-start (current-time))) ; restart timeout timer
+  s)
 
 
 (defun clipmon--play-sound ()
@@ -287,7 +294,7 @@ Otherwise stop clipmon if it's been idle a while."
 
 
 ;;;; Library functions
-; -----------------------------------------------------------------------------
+;; ----------------------------------------------------------------------------
 
 (defun clipboard-contents ()
   "Get contents of system clipboard, as opposed to Emacs's kill ring.
