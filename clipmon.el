@@ -19,16 +19,19 @@
 ;;;; Description
 ;; ----------------------------------------------------------------------------
 ;;
-;; Clipmon monitors the system clipboard and pastes any changes into the current
-;; location in Emacs.
+;; Clipmon is a clipboard monitor - it watches the system clipboard and pastes
+;; any changes into the current location in Emacs.
 ;;
 ;; This makes it easier to take notes from a webpage, for example - just copy
-;; the text you want to save. You can still use the Emacs kill-ring with yank
-;; and pull as usual, since clipmon only looks at the system clipboard.
+;; the text you want to save and it will be pasted into Emacs. You can still use
+;; the Emacs kill-ring with yank and pull as usual, since clipmon only looks at
+;; the system clipboard.
 ;;
-;; Works best when paired with an autocopy feature or plugin for the browser,
-;; e.g. AutoCopy 2 for Firefox - then you can just select text to copy it to the
-;; clipboard.
+;; This works best when paired with an autocopy feature or plugin for the
+;; browser, e.g. AutoCopy 2 for Firefox [1] - then you can just select text to
+;; copy it to the clipboard.
+;;
+;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 ;;
 ;;
 ;;;; Usage
