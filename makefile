@@ -11,6 +11,9 @@ help:
 	@echo "make compile  compile .el files to .elc"
 	@echo "make clean    delete readme, .elc files"
 
+# this is for package.el, but melpa does this automatically?
+# tar:
+#	tar  to clipmon-0.1.20141227.tar  clipmon.el clipmon-pkg.el
 
 readme: README.md
 README.md: clipmon.el

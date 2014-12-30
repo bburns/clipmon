@@ -195,9 +195,13 @@ E.g. to make the text lowercase before pasting,
 (defvar clipmon--previous-contents nil "Last contents of the clipboard.")
 (defvar clipmon--cursor-color-original nil "Original cursor color.")
 
+(defconst clipmon--folder
+  (file-name-directory load-file-name)
+  "Path to clipmon install folder.")
+
 (defconst clipmon--included-sound-file
-    (concat (file-name-directory (or load-file-name (buffer-file-name))) "ding.wav")
-    "Path to the included audio file.")
+  (expand-file-name "ding.wav" clipmon--folder)
+  "Path to included audio file.")
 
 
 
