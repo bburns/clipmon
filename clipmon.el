@@ -190,6 +190,7 @@ E.g. to make the text lowercase before pasting,
 ;;;; Private variables
 ;; ----------------------------------------------------------------------------
 
+(defvar clipmon nil "Clipmon status: t if monitoring clipboard.")
 (defvar clipmon--timer nil "Timer handle for clipboard monitor.")
 (defvar clipmon--timeout-start nil "Time that timeout timer was started.")
 (defvar clipmon--previous-contents nil "Last contents of the clipboard.")
@@ -212,14 +213,14 @@ E.g. to make the text lowercase before pasting,
 (defun clipmon-toggle ()
   "Turn clipmon (clipboard monitor) on and off."
   (interactive)
-  (if clipmon--timer (clipmon-stop) (clipmon-start)))
+  (if clipmon (clipmon-stop) (clipmon-start)))
 
 
 (defun clipmon-start ()
   "Start the clipboard timer, change cursor color, and play a sound."
   (interactive)
   (let ((clipmon-keys (get-function-keys 'clipmon-toggle))) ; eg "<M-f2>, C-0"
-    (if clipmon--timer
+    (if clipmon
         (message "Clipboard monitor already running. Stop with %s." clipmon-keys)
       ; initialize
       (setq clipmon--previous-contents (clipboard-contents))
@@ -234,6 +235,7 @@ E.g. to make the text lowercase before pasting,
        "Clipboard monitor started with timer interval %d seconds. Stop with %s."
        clipmon-interval clipmon-keys)
       (clipmon--play-sound)
+      (setq clipmon t)
       )))
 
 
@@ -246,6 +248,7 @@ E.g. to make the text lowercase before pasting,
       (set-face-background 'cursor clipmon--cursor-color-original))
   (message "Clipboard monitor stopped.")
   (clipmon--play-sound)
+  (setq clipmon nil)
   )
 
 
