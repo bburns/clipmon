@@ -1,14 +1,13 @@
 ;;; clipmon.el --- Clipboard monitor - automatically pastes clipboard changes.
 ;;; About:
 ;;
-;; Copyright (C) 2014 Brian Burns
+;; Copyright (c) 2014-2015 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; Homepage: https://github.com/bburns/clipmon
 ;;
-;; Version: 0.1.20141227
+;; Version: 20150102
 ;; Keywords: convenience
-;; Created: 2014-02-21
 ;; License: GPLv3
 ;;
 ;; This file is NOT part of GNU Emacs.
