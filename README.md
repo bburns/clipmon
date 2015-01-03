@@ -90,6 +90,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Author: Brian Burns <bburns.km@gmail.com>  
 Homepage: https://github.com/bburns/clipmon  
-Version: 0.1.20141227  
+Version: 20150102  
 
 ----
+
