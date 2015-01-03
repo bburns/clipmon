@@ -107,15 +107,13 @@
   "Clipboard monitor - automatically paste clipboard changes."
   :group 'convenience
   :group 'killing
-  :version "24.4"
-  )
+  :version "24.4")
 
 
 (defcustom clipmon-cursor-color "red"
   "Color to set cursor when clipmon is on. Set to nil for no change."
   :group 'clipmon
-  :type 'color
-  )
+  :type 'color)
 
 (defcustom clipmon-sound t
   "Path to sound file to play on paste, t for included file, or nil.
@@ -127,21 +125,18 @@ audio file - Emacs can play .wav or .au files."
   :group 'clipmon
   :type '(radio
           (string :tag "Audio file (.wav or .au)")
-          (boolean :tag "Included sound file"))
-  )
+          (boolean :tag "Included sound file")))
 
 (defcustom clipmon-interval 2
   "Interval for checking clipboard, in seconds."
   :group 'clipmon
-  :type 'integer
-  )
+  :type 'integer)
 
 (defcustom clipmon-timeout 5
   "Stop the timer if no clipboard activity after this many minutes.
 Set to nil for no timeout."
   :group 'clipmon
-  :type 'integer
-  )
+  :type 'integer)
 
 
 ;; transforms on text - these are performed in this order
@@ -151,29 +146,25 @@ Set to nil for no timeout."
 Often it's hard to select text without grabbing a leading space,
 so this will remove it."
   :group 'clipmon
-  :type 'boolean
-  )
+  :type 'boolean)
 
 (defcustom clipmon-remove-regexp
   "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
   "Any text matching this regexp will be removed before pasting.
 e.g. Wikipedia-style references - [3], [12]."
   :group 'clipmon
-  :type 'regexp
-  )
+  :type 'regexp)
 
 (defcustom clipmon-prefix ""
   "String to add to start of clipboard contents before pasting."
   :group 'clipmon
-  :type 'string
-  )
+  :type 'string)
 
 (defcustom clipmon-suffix "\n\n"
   "String to append to clipboard contents before pasting.
 Default is two newlines, which leaves a blank line in between pastes."
   :group 'clipmon
-  :type 'string
-  )
+  :type 'string)
 
 (defcustom clipmon-transform-function nil
   "Function to perform additional transformations on the clipboard text.
@@ -181,8 +172,7 @@ Receives one argument, the clipboard text - should return the changed text.
 E.g. to make the text lowercase before pasting,
     (setq clipmon-transform-function (lambda (s) (downcase s)))"
   :group 'clipmon
-  :type 'function
-  )
+  :type 'function)
 
 
 
@@ -269,8 +259,7 @@ Otherwise stop clipmon if it's been idle a while."
                 (message
                  "Clipboard monitor stopped after %d minutes of inactivity."
                  clipmon-timeout)
-                )))
-        )))
+                ))))))
 
 
 (defun clipmon--on-clipboard-change (s)
