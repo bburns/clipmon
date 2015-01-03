@@ -218,37 +218,37 @@ E.g. to make the text lowercase before pasting,
 (defun clipmon-start ()
   "Start the clipboard timer, change cursor color, and play a sound."
   (interactive)
-  (let ((clipmon-keys (get-function-keys 'clipmon-toggle))) ; eg "<M-f2>, C-0"
-    (if clipmon
-        (message "Clipboard monitor already running. Stop with %s." clipmon-keys)
-      ; initialize
-      (setq clipmon--previous-contents (clipboard-contents))
-      (setq clipmon--timeout-start (current-time))
-      (setq clipmon--timer
-            (run-at-time nil clipmon-interval 'clipmon--check-clipboard))
-      ; change cursor color
-      (when clipmon-cursor-color
-        (setq clipmon--cursor-color-original (face-background 'cursor))
-        (set-face-background 'cursor clipmon-cursor-color))
-      (message
-       "Clipboard monitor started with timer interval %d seconds. Stop with %s."
-       clipmon-interval clipmon-keys)
-      (clipmon--play-sound)
-      (setq clipmon t)
-      )))
+  (if clipmon
+      (message "Clipboard monitor already running.")
+    ; initialize
+    (setq clipmon--previous-contents (clipboard-contents))
+    (setq clipmon--timeout-start (current-time))
+    (setq clipmon--timer
+          (run-at-time nil clipmon-interval 'clipmon--check-clipboard))
+    ; change cursor color
+    (when clipmon-cursor-color
+      (setq clipmon--cursor-color-original (face-background 'cursor))
+      (set-face-background 'cursor clipmon-cursor-color))
+    (message
+     "Clipboard monitor started with timer interval %d seconds. Stop with %s."
+     clipmon-interval
+     (substitute-command-keys "\\[clipmon-toggle]")) ; eg "<M-f2>"
+    (clipmon--play-sound)
+    (setq clipmon t)))
 
 
 (defun clipmon-stop ()
   "Stop the clipboard timer, restore cursor, and play a sound."
   (interactive)
-  (cancel-timer clipmon--timer)
-  (setq clipmon--timer nil)
-  (if clipmon--cursor-color-original
-      (set-face-background 'cursor clipmon--cursor-color-original))
-  (message "Clipboard monitor stopped.")
-  (clipmon--play-sound)
-  (setq clipmon nil)
-  )
+  (if (null clipmon)
+      (message "Clipboard monitor already stopped.")
+    (cancel-timer clipmon--timer)
+    (setq clipmon--timer nil)
+    (if clipmon--cursor-color-original
+        (set-face-background 'cursor clipmon--cursor-color-original))
+    (message "Clipboard monitor stopped.")
+    (clipmon--play-sound)
+    (setq clipmon nil)))
 
 
 
@@ -304,16 +304,9 @@ Otherwise stop clipmon if it's been idle a while."
 ;;;; Library functions
 ;; ----------------------------------------------------------------------------
 
-(defun clipboard-contents ()
+(defalias 'clipboard-contents 'x-get-selection-value
   "Get contents of system clipboard, as opposed to Emacs's kill ring.
-Returns a string, or nil."
-  (x-get-selection-value))
-
-
-(defun get-function-keys (function)
-  "Get list of keys bound to a function, as a string.
-e.g. (get-function-keys 'ibuffer) => \"C-x C-b, <menu-bar>...\""
-  (mapconcat 'key-description (where-is-internal function) ", "))
+Returns a string, or nil.")
 
 
 (defun trim-left (s)
