@@ -182,14 +182,14 @@ E.g. to make the text lowercase before pasting,
 (define-key-after global-map [menu-bar options clipmon]
   '(menu-item "Clipboard monitor" clipmon-toggle
               :help "Automatically paste changes from the clipboard."
-              :button (:toggle . clipmon))
+              :button (:toggle . clipmon--on))
   'blink-cursor-mode) ; add after this item
 
 
 ;;;; Private variables
 ;; ----------------------------------------------------------------------------
 
-(defvar clipmon nil "Clipmon status: t if monitoring clipboard.")
+(defvar clipmon--on nil "Clipmon status: t if monitoring clipboard.")
 (defvar clipmon--timer nil "Timer handle for clipboard monitor.")
 (defvar clipmon--timeout-start nil "Time that timeout timer was started.")
 (defvar clipmon--previous-contents nil "Last contents of the clipboard.")
@@ -212,13 +212,13 @@ E.g. to make the text lowercase before pasting,
 (defun clipmon-toggle ()
   "Turn clipmon (clipboard monitor) on and off."
   (interactive)
-  (if clipmon (clipmon-stop) (clipmon-start)))
+  (if clipmon--on (clipmon-stop) (clipmon-start)))
 
 
 (defun clipmon-start ()
   "Start the clipboard timer, change cursor color, and play a sound."
   (interactive)
-  (if clipmon
+  (if clipmon--on
       (message "Clipboard monitor already running.")
     ; initialize
     (setq clipmon--previous-contents (clipboard-contents))
@@ -234,13 +234,13 @@ E.g. to make the text lowercase before pasting,
      clipmon-interval
      (substitute-command-keys "\\[clipmon-toggle]")) ; eg "<M-f2>"
     (clipmon--play-sound)
-    (setq clipmon t)))
+    (setq clipmon--on t)))
 
 
 (defun clipmon-stop ()
   "Stop the clipboard timer, restore cursor, and play a sound."
   (interactive)
-  (if (null clipmon)
+  (if (null clipmon--on)
       (message "Clipboard monitor already stopped.")
     (cancel-timer clipmon--timer)
     (setq clipmon--timer nil)
@@ -248,7 +248,7 @@ E.g. to make the text lowercase before pasting,
         (set-face-background 'cursor clipmon--cursor-color-original))
     (message "Clipboard monitor stopped.")
     (clipmon--play-sound)
-    (setq clipmon nil)))
+    (setq clipmon--on nil)))
 
 
 

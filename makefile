@@ -9,7 +9,7 @@ help:
 	@echo "make readme   make README.md from .el commentary section"
 	@echo "make test     run unit tests in -test.el file"
 	@echo "make compile  compile .el files to .elc"
-	@echo "make clean    delete readme, .elc files"
+	@echo "make clean    delete .elc files"
 
 # this is for package.el, but melpa does this automatically?
 # tar:
@@ -26,7 +26,6 @@ compile:
 	emacs -batch -L . --eval="(byte-compile-file \"clipmon.el\")"
 
 clean:
-	rm -f README.md
 	rm -f *.elc
 
 
