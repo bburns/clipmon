@@ -175,6 +175,16 @@ E.g. to make the text lowercase before pasting,
   :type 'function)
 
 
+;;;; Initialize
+;; ----------------------------------------------------------------------------
+
+; add to Options menu
+(define-key-after global-map [menu-bar options clipmon]
+  '(menu-item "Clipboard monitor" clipmon-toggle
+              :help "Automatically paste changes from the clipboard."
+              :button (:toggle . clipmon))
+  'blink-cursor-mode) ; add after this item
+
 
 ;;;; Private variables
 ;; ----------------------------------------------------------------------------
