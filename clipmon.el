@@ -1,10 +1,11 @@
-;;; clipmon.el --- Clipboard monitor - automatically pastes clipboard changes.
+;;; clipmon.el --- clipboard monitor: automatically paste clipboard changes
 ;;; About:
 ;;
 ;; Copyright (c) 2014-2015 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; Homepage: https://github.com/bburns/clipmon
+;; URL: https://github.com/bburns/clipmon
 ;;
 ;; Version: 20150102
 ;; Keywords: convenience
@@ -21,14 +22,13 @@
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and pastes
 ;; any changes into the current location in Emacs.
 ;;
-;; This makes it easier to take notes from a webpage, for example - just copy
-;; the text you want to save and it will be pasted into Emacs. You can still use
-;; the Emacs kill-ring with yank and pull as usual, since clipmon only looks at
-;; the system clipboard.
+;; This is useful when taking notes from a webpage, for example - just copy the
+;; text you want to save and it will be pasted into Emacs. It works best when
+;; paired with an autocopy feature or plugin for the browser, e.g. AutoCopy 2
+;; for Firefox [1] - then you can just select text to copy it to the clipboard.
 ;;
-;; This works best when paired with an autocopy feature or plugin for the
-;; browser, e.g. AutoCopy 2 for Firefox [1] - then you can just select text to
-;; copy it to the clipboard.
+;; You can still use the Emacs kill-ring with yank and pull as usual while
+;; clipmon is on, since it only looks at the system clipboard.
 ;;
 ;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 ;;
@@ -40,10 +40,9 @@
 ;;
 ;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
 ;;
-;; Then turn it on and go to another application, like a browser, and copy some
-;; text to the clipboard - clipmon should detect it after a second or two, and
-;; make a sound. If you switch back to Emacs, it should have pasted the text
-;; into your buffer.
+;; Then turn it on and go to another application and copy some text to the
+;; clipboard - clipmon should detect it after a second or two, and make a sound.
+;; If you switch back to Emacs, it should have pasted the text into your buffer.
 ;;
 ;;
 ;;;; Options
