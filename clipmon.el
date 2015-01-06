@@ -22,13 +22,10 @@
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and pastes
 ;; any changes into the current location in Emacs.
 ;;
-;; This is useful when taking notes from a webpage, for example - just copy the
-;; text you want to save and it will be pasted into Emacs. It works best when
-;; paired with an autocopy feature or plugin for the browser, e.g. AutoCopy 2
-;; for Firefox [1] - then you can just select text to copy it to the clipboard.
-;;
-;; You can still use the Emacs kill-ring with yank and pull as usual while
-;; clipmon is on, since it only looks at the system clipboard.
+;; This is helpful when taking notes from a webpage, for example - just copy the
+;; text you want to save and it will be pasted into Emacs. Works best when
+;; paired with an autocopy feature or addon for the browser, e.g. AutoCopy 2 for
+;; Firefox [1] - then you can just select text to copy it to the clipboard.
 ;;
 ;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 ;;
@@ -44,6 +41,9 @@
 ;; clipboard - clipmon should detect it after a second or two, and make a sound.
 ;; If you switch back to Emacs, it should have pasted the text into your buffer.
 ;;
+;; You can still use the Emacs kill-ring with yank and pull as usual while
+;; clipmon is on, since it only looks at the system clipboard.
+;;
 ;;
 ;;;; Options
 ;; ----------------------------------------------------------------------------
@@ -58,7 +58,7 @@
 ;;
 ;; A sound can be played on each change, and on starting and stopping clipmon.
 ;; The sound can be set with `clipmon-sound' - this can be t for the included
-;; ding.wav file, a path to a sound file (.wav or .au), or nil for no sound.
+;; sound file, a path to a sound file (.wav or .au), or nil for no sound.
 ;;
 ;; When selecting text to copy, it's sometimes difficult to avoid grabbing a
 ;; leading space - to remove these from the text, set `clipmon-trim-string' to t
@@ -72,9 +72,9 @@
 ;; `clipmon-prefix' and `clipmon-suffix'. By default the suffix is set to two
 ;; newlines, which will leave a blank line in between entries.
 ;;
-;; For more customization, set `clipmon-transform-function' to a function that
-;; takes the clipboard text and returns a modified version - e.g. to make the
-;; text lowercase before pasting,
+;; For any more customization, set `clipmon-transform-function' to a function
+;; that takes the clipboard text and returns a modified version - e.g. to make
+;; the text lowercase before pasting,
 ;;    (setq clipmon-transform-function (lambda (s) (downcase s)))
 ;;
 ;; See all options here: (customize-group 'clipmon)
@@ -96,7 +96,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
-;;
+;; 
 ;;; Code:
 ;;
 ;;;; Public settings
