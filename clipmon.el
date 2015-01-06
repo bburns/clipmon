@@ -4,12 +4,12 @@
 ;; Copyright (c) 2014-2015 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
-;; URL: https://github.com/bburns/clipmon
+;; Homepage: https://github.com/bburns/clipmon
 ;; Keywords: convenience
-;; License: GPLv3, CCAv4
+;; License: GPLv3
 ;; Version: 20150102
 ;;
-;; This file is NOT part of GNU Emacs.
+;; This package is NOT part of GNU Emacs.
 ;;
 ;;
 ;;; Commentary:
@@ -55,8 +55,9 @@
 ;; for no change.
 ;;
 ;; A sound can be played on each change, and on starting and stopping clipmon.
-;; The sound can be set with `clipmon-sound' - this can be t for the included
-;; sound file, a path to a sound file (.wav or .au), or nil for no sound.
+;; The sound can be set with `clipmon-sound' - this can be t for an included
+;; sound file (a quietish beep), a path to a sound file (.wav or .au), or nil
+;; for no sound.
 ;;
 ;; When selecting text to copy, it's sometimes difficult to avoid grabbing a
 ;; leading space - to remove these from the text, set `clipmon-trim-string' to t
@@ -78,6 +79,16 @@
 ;; See all options here: (customize-group 'clipmon)
 ;;
 ;;
+;;;; Sound File
+;; ----------------------------------------------------------------------------
+;;
+;; The sound file was created with Audacity [2] - it's a 2kHz sine wave with
+;; several overtones, and slightly quiet so it doesn't get too annoying when
+;; you're taking a lot of notes (hopefully).
+;;
+;; [2] http://audacity.sourceforge.net/
+;;
+;;
 ;;;; License
 ;; ----------------------------------------------------------------------------
 ;;
@@ -93,14 +104,6 @@
 ;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
-;;
-;;
-;; The sound file was created with Audacity [2], and is released under the
-;; Creative Commons Attribution License [3].
-;; It's a 2kHz sine wave with 4, 7, 9, 13, and 15kHz overtones.
-;;
-;; [2] http://audacity.sourceforge.net/
-;; [3] http://creativecommons.org/licenses/by/4.0/
 ;;
 ;;
 ;;
