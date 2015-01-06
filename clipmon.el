@@ -4,12 +4,10 @@
 ;; Copyright (c) 2014-2015 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
-;; Homepage: https://github.com/bburns/clipmon
 ;; URL: https://github.com/bburns/clipmon
-;;
-;; Version: 20150102
 ;; Keywords: convenience
-;; License: GPLv3
+;; License: GPLv3, CCAv4
+;; Version: 20150102
 ;;
 ;; This file is NOT part of GNU Emacs.
 ;;
@@ -96,7 +94,16 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
-;; 
+;;
+;; The sound file was created with Audacity [2], and is released under the
+;; Creative Commons Attribution License [3].
+;; It's a 2kHz sine wave with 4, 7, 9, 13, and 15kHz overtones.
+;;
+;; [2] http://audacity.sourceforge.net/
+;; [3] http://creativecommons.org/licenses/by/4.0/
+;;
+;;
+;;
 ;;; Code:
 ;;
 ;;;; Public settings
@@ -106,7 +113,7 @@
   "Clipboard monitor - automatically paste clipboard changes."
   :group 'convenience
   :group 'killing
-  :version "24.4")
+  :package-version '(clipmon . "20150102"))
 
 
 (defcustom clipmon-cursor-color "red"
@@ -171,7 +178,8 @@ Receives one argument, the clipboard text - should return the changed text.
 E.g. to make the text lowercase before pasting,
     (setq clipmon-transform-function (lambda (s) (downcase s)))"
   :group 'clipmon
-  :type 'function)
+  :type 'function
+  :risky t)
 
 
 ;;;; Initialize
