@@ -9,13 +9,10 @@ Description
 Clipmon is a clipboard monitor - it watches the system clipboard and pastes
 any changes into the current location in Emacs.
 
-This is useful when taking notes from a webpage, for example - just copy the
-text you want to save and it will be pasted into Emacs. It works best when
-paired with an autocopy feature or plugin for the browser, e.g. AutoCopy 2
-for Firefox [1] - then you can just select text to copy it to the clipboard.
-
-You can still use the Emacs kill-ring with yank and pull as usual while
-clipmon is on, since it only looks at the system clipboard.
+This is helpful when taking notes from a webpage, for example - just copy the
+text you want to save and it will be pasted into Emacs. Works best when
+paired with an autocopy feature or addon for the browser, e.g. AutoCopy 2 for
+Firefox [1] - then you can just select text to copy it to the clipboard.
 
 [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 
@@ -31,6 +28,9 @@ Then turn it on and go to another application and copy some text to the
 clipboard - clipmon should detect it after a second or two, and make a sound.
 If you switch back to Emacs, it should have pasted the text into your buffer.
 
+You can still use the Emacs kill-ring with yank and pull as usual while
+clipmon is on, since it only looks at the system clipboard.
+
 
 Options
 ----------------------------------------------------------------------------
@@ -44,8 +44,9 @@ The cursor color can be set with `clipmon-cursor-color` - eg "red", or nil
 for no change.
 
 A sound can be played on each change, and on starting and stopping clipmon.
-The sound can be set with `clipmon-sound` - this can be t for the included
-sound file, a path to a sound file (.wav or .au), or nil for no sound.
+The sound can be set with `clipmon-sound` - this can be t for an included
+sound file (a quietish beep), a path to a sound file (.wav or .au), or nil
+for no sound.
 
 When selecting text to copy, it's sometimes difficult to avoid grabbing a
 leading space - to remove these from the text, set `clipmon-trim-string` to t
@@ -67,6 +68,16 @@ the text lowercase before pasting,
 See all options here: (customize-group 'clipmon)
 
 
+Sound File
+----------------------------------------------------------------------------
+
+The sound file was created with Audacity [2] - it's a 2kHz sine wave with
+several overtones, and slightly quiet so it doesn't get too annoying when
+you're taking a lot of notes (hopefully).
+
+[2] http://audacity.sourceforge.net/
+
+
 License
 ----------------------------------------------------------------------------
 
@@ -82,6 +93,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 
 ----

@@ -210,7 +210,7 @@ E.g. to make the text lowercase before pasting,
   "Path to clipmon install folder.")
 
 (defconst clipmon--included-sound-file
-  (expand-file-name "beepbeep.wav" clipmon--folder)
+  (expand-file-name "clipmon.wav" clipmon--folder)
   "Path to included audio file.")
 
 

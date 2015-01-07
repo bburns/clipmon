@@ -3,14 +3,18 @@
 PACKAGE = clipmon
 CONTENTS := beepbeep.wav
 
+VERSION != grep ";; Version:" ${PACKAGE}.el | grep -E -o [0-9]+
+# DESCRIPTION != grep ";;; ${PACKAGE}.el --- " ${PACKAGE}.el | grep -E -o [0-9]+
+# HOMEPAGE !=
+
 EMACS = emacs
 CASK = cask
 
 
-all: help
-
 help:
+	@echo ""
 	@echo "make test     run unit tests in <package>-test.el file"
+	@echo "make all      clean, compile, pkg, readme, tar"
 	@echo "make compile  compile .el files to .elc"
 	@echo "make pkg      make <package>-pkg.el file for multi-file packages"
 	@echo "make readme   make README.md from <package>.el commentary section"
@@ -18,44 +22,44 @@ help:
 	@echo "make clean    delete readme, -pkg, .elc, .tar"
 
 
-VERSION != grep ";; Version:" ${PACKAGE}.el | grep -E -o [0-9]+
-PACKAGE_DIR := ${PACKAGE}-${VERSION}
-PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
+test: compile
+	${EMACS} -Q -batch -L . -l ${PACKAGE}-test.el -f ert-run-tests-batch
 
-test:
-	${EMACS} -batch -L . -l ${PACKAGE}-test.el -f ert-run-tests-batch
+
+all: clean compile pkg readme tar
 
 compile:
-	${EMACS} -batch -L . --eval="(byte-compile-file \"${PACKAGE}.el\")"
-
-compile1:
-	${EMACS} -Q -batch -f batch-byte-compile f.el
+	${EMACS} -Q -batch -L . --eval="(byte-compile-file \"${PACKAGE}.el\")"
 
 pkg:
 	${CASK} pkg-file
+	cat ${PACKAGE}-pkg.el
 
-# pkg:
-# 	echo "{define-package \"clipmon\" \"${VERSION}\" \"Clipboard monitor - automatically pastes clipboard changes.\"}" > clipmon-pkg.el
-# clipmon-pkg-template.el:
-# sed -re "s/VERSION/${VERSION}/" $@/clipmon-pkg-template.el > $@/clipmon-pkg.el
-# 	echo {define-package "clipmon" "VERSION" "Clipboard monitor - automatically pastes clipboard changes."} > clipmon-pkg-template.el
-
+# 	echo "{define-package \"${PACKAGE}\" \"${VERSION}\" \"${DESCRIPTION}\"}" > ${PACKAGE}-pkg.el
 
 readme:
 	${EMACS} --script make-readme-markdown.el <${PACKAGE}.el >README.md
+	head -5 README.md
+	tail -5 README.md
+#	cat README.md
+
+
+PACKAGE_DIR := ${PACKAGE}-${VERSION}
+PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
 
 tar:
 	mkdir ${PACKAGE_DIR}
 	cp ${PACKAGE}.el ${PACKAGE}-pkg.el ${PACKAGE_DIR}
 	cp ${CONTENTS} ${PACKAGE_DIR}
 	tar -cf ${PACKAGE_TAR} ${PACKAGE_DIR}
+	tar -tvf ${PACKAGE_TAR}
 
 clean:
 	rm -f *.elc
 	rm -f README.md
 	rm -f ${PACKAGE}-pkg.el
 	rm -f ${PACKAGE_TAR}
-	rm -rd ${PACKAGE_DIR}
+	rm -rdf ${PACKAGE_DIR}
 
 
 
