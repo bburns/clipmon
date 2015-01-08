@@ -80,7 +80,7 @@ pkg0:
 # make readonly so won't mistakenly think it's okay to edit it
 readme:
 	rm -f README.md
-	${EMACS} --script make-readme-markdown.el <${SOURCE} >README.md
+	${EMACS} --script make-readme.el <${SOURCE} >README.md
 	attrib +r README.md
 	head -5 README.md
 	tail -9 README.md
