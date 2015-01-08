@@ -1,5 +1,5 @@
 
-# package makefile
+# makefile for packages, a work in progress
 
 
 # set name of package and any extra contents for .tar file
@@ -27,10 +27,14 @@ KEYWORDS := "\"${KEYWORDS}\""
 DEPENDENCIES = "nil"
 
 
-
 EMACS = emacs
 CASK = cask
 # MELPA = c:/users/bburns/dropbox/emacs/projects/melpa/packages
+
+
+# include travis.ci makefile
+# include Makefile_travis
+
 
 
 help:
