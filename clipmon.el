@@ -20,11 +20,13 @@
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and pastes
 ;; any changes into the current location in Emacs.
 ;;
-;; This is helpful when taking notes from a webpage, for example - just copy the
-;; text you want to save and it will be pasted into Emacs. Works best when
-;; paired with an autocopy feature or addon for the browser, e.g. AutoCopy 2 for
-;; Firefox [https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/] -
+;; This helps when taking notes from a webpage - just copy the text you want to
+;; save and it will be pasted into Emacs. Works best when paired with an
+;; autocopy feature or addon for the browser, e.g. AutoCopy 2 for Firefox [1] -
 ;; then you can just select text to copy it to the clipboard.
+;;
+;;
+;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 ;;
 ;;
 ;;;; Usage
@@ -186,11 +188,12 @@ E.g. to make the text lowercase before pasting,
 ;;;; Initialize
 ;; ----------------------------------------------------------------------------
 
-; add to Options menu
-(define-key-after global-map [menu-bar options clipmon]
-  '(menu-item "Clipboard monitor" clipmon-toggle
-              :help "Automatically paste changes from the clipboard."
-              :button (:toggle . clipmon--on))
+; add item to Options menu
+(define-key-after global-map [menu-bar options clipmon] ; path to new item
+  '(menu-item "Clipboard monitor"
+              clipmon-toggle ; function to call on click
+              :help "Automatically paste changes from the clipboard." ; tooltip
+              :button (:toggle . clipmon--on)) ; show checkmark if variable nonnil
   'blink-cursor-mode) ; add after this item
 
 
