@@ -9,11 +9,13 @@ Description
 Clipmon is a clipboard monitor - it watches the system clipboard and pastes
 any changes into the current location in Emacs.
 
-This is helpful when taking notes from a webpage, for example - just copy the
-text you want to save and it will be pasted into Emacs. Works best when
-paired with an autocopy feature or addon for the browser, e.g. AutoCopy 2 for
-Firefox [https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/] -
+This helps when taking notes from a webpage - just copy the text you want to
+save and it will be pasted into Emacs. Works best when paired with an
+autocopy feature or addon for the browser, e.g. AutoCopy 2 for Firefox [1] -
 then you can just select text to copy it to the clipboard.
+
+
+[1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 
 
 Usage
