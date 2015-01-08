@@ -13,13 +13,20 @@ SOURCE = ${PACKAGE}.el
 PKG = ${PACKAGE}-pkg.el
 TEST = ${PACKAGE}-test.el
 
+
+#. better to call an elisp fn to parse this stuff and make -pkg file
+#. currently handles only one keyword, and no dependencies
+
 # using grep -P for perl regexp, -o to just output match
 # ?<= is the look-behind operator - match is not included in output
 DESCRIPTION  != grep ";;; ${SOURCE} --- " ${SOURCE} | grep -Po "(?<= --- ).+"
+VERSION      != grep ";; Version:"        ${SOURCE} | grep -Po [0-9]+
 HOMEPAGE     != grep ";; URL:"            ${SOURCE} | grep -Po "(?<=;; URL: ).+"
 KEYWORDS     != grep ";; Keywords:"       ${SOURCE} | grep -Po "(?<=;; Keywords: ).+"
-VERSION      != grep ";; Version:"        ${SOURCE} | grep -Po [0-9]+
+KEYWORDS := "\"${KEYWORDS}\""
 DEPENDENCIES = "nil"
+
+
 
 EMACS = emacs
 CASK = cask
@@ -41,10 +48,12 @@ help:
 
 
 info:
-	@echo "Package:      ${PACKAGE}"
-	@echo "Description:  ${DESCRIPTION}"
-	@echo "Homepage:     ${HOMEPAGE}"
-	@echo "Version:      ${VERSION}"
+	@echo "Package:       ${PACKAGE}"
+	@echo "Description:   ${DESCRIPTION}"
+	@echo "Homepage:      ${HOMEPAGE}"
+	@echo "Version:       ${VERSION}"
+	@echo "Keywords:      ${KEYWORDS}"
+	@echo "Dependencies:  ${DEPENDENCIES}"
 	@echo ""
 
 
@@ -62,6 +71,7 @@ compile1:
 	${EMACS} -Q -batch -L . -f batch-byte-compile *.el
 
 
+# :keywords '("speed" "convenience"))
 pkg:
 	@echo "(define-package \"${PACKAGE}\" \"${VERSION}\"" > ${PKG}
 	@echo "  \"${DESCRIPTION}\""        >> ${PKG}

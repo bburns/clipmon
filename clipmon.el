@@ -167,8 +167,9 @@ e.g. Wikipedia-style references - [3], [12]."
   :type 'string)
 
 (defcustom clipmon-suffix "\n\n"
-  "String to append to clipboard contents before pasting.
-Default is two newlines, which leaves a blank line in between pastes."
+  "String to add to end of clipboard contents before pasting.
+Default is two newlines, which leaves a blank line between clips.
+To add a newline, type C-q C-j."
   :group 'clipmon
   :type 'string)
 
