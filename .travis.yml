@@ -151,7 +151,9 @@ before_script:
 
 # script:
 #   $EMACS --version && ( test "$EMACS" != 'emacs22' && make test EMACS="$EMACS" || make test-batch EMACS="$EMACS" )
-script: make test
+script:
+  - emacs --version
+  - make test
 
 ###
 ### settings

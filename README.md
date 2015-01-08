@@ -1,6 +1,6 @@
 
-clipmon.el
-==========
+## clipmon.el [![Build Status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon)
+----
 
 
 Description
