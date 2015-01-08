@@ -1,68 +1,117 @@
 
+# package makefile
+
+
 # set name of package and any extra contents for .tar file
 PACKAGE = clipmon
-CONTENTS := beepbeep.wav
+CONTENTS := clipmon.wav
 
-VERSION != grep ";; Version:" ${PACKAGE}.el | grep -E -o [0-9]+
-# DESCRIPTION != grep ";;; ${PACKAGE}.el --- " ${PACKAGE}.el | grep -E -o [0-9]+
-# HOMEPAGE !=
+
+# rest should be reusable
+
+SOURCE = ${PACKAGE}.el
+PKG = ${PACKAGE}-pkg.el
+TEST = ${PACKAGE}-test.el
+
+# using grep -P for perl regexp, -o to just output match
+# ?<= is the look-behind operator - match is not included in output
+DESCRIPTION  != grep ";;; ${SOURCE} --- " ${SOURCE} | grep -Po "(?<= --- ).+"
+HOMEPAGE     != grep ";; URL:"            ${SOURCE} | grep -Po "(?<=;; URL: ).+"
+KEYWORDS     != grep ";; Keywords:"       ${SOURCE} | grep -Po "(?<=;; Keywords: ).+"
+VERSION      != grep ";; Version:"        ${SOURCE} | grep -Po [0-9]+
+DEPENDENCIES = "nil"
 
 EMACS = emacs
 CASK = cask
+# MELPA = c:/users/bburns/dropbox/emacs/projects/melpa/packages
 
 
 help:
 	@echo ""
-	@echo "make test     run unit tests in <package>-test.el file"
-	@echo "make all      clean, compile, pkg, readme, tar"
-	@echo "make compile  compile .el files to .elc"
-	@echo "make pkg      make <package>-pkg.el file for multi-file packages"
-	@echo "make readme   make README.md from <package>.el commentary section"
-	@echo "make tar      make <package>-<version>.tar package file for package.el"
-	@echo "make clean    delete readme, -pkg, .elc, .tar"
+	@echo "make info       show package info extracted from <package>.el"
+	@echo "make test       run unit tests in <package>-test.el file"
+	@echo "make all        clean, compile, pkg, readme, tar"
+	@echo "make compile    compile .el files to .elc"
+	@echo "make pkg        make <package>-pkg.el file for multi-file packages"
+	@echo "make readme     make README.md from <package>.el commentary section"
+	@echo "make tar        make <package>-<version>.tar package file"
+	@echo "make clean      delete readme, -pkg, .elc, .tar"
+	@echo "make clean-elc  delete .elc"
+	@echo ""
+
+
+info:
+	@echo "Package:      ${PACKAGE}"
+	@echo "Description:  ${DESCRIPTION}"
+	@echo "Homepage:     ${HOMEPAGE}"
+	@echo "Version:      ${VERSION}"
+	@echo ""
 
 
 test: compile
-	${EMACS} -Q -batch -L . -l ${PACKAGE}-test.el -f ert-run-tests-batch
+	${EMACS} -Q -batch -L . -l ${TEST} -f ert-run-tests-batch
 
 
 all: clean compile pkg readme tar
 
 compile:
-	${EMACS} -Q -batch -L . --eval="(byte-compile-file \"${PACKAGE}.el\")"
+	${EMACS} -Q -batch -L . --eval="(byte-compile-file \"${SOURCE}\")"
+
+# need -L . so tests can (require 'clipmon)
+compile1:
+	${EMACS} -Q -batch -L . -f batch-byte-compile *.el
+
 
 pkg:
+	@echo "(define-package \"${PACKAGE}\" \"${VERSION}\"" > ${PKG}
+	@echo "  \"${DESCRIPTION}\""        >> ${PKG}
+	@echo "  ${DEPENDENCIES}"           >> ${PKG}
+	@echo "  :url \"${HOMEPAGE}\""      >> ${PKG}
+	@echo "  :keywords '(${KEYWORDS}))" >> ${PKG}
+	cat ${PKG}
+
+# cask is asynchronous
+pkg0:
+	@echo "Running cask - hit Enter when done..."
 	${CASK} pkg-file
-	cat ${PACKAGE}-pkg.el
+	read
+	cat ${PKG}
 
-# 	echo "{define-package \"${PACKAGE}\" \"${VERSION}\" \"${DESCRIPTION}\"}" > ${PACKAGE}-pkg.el
-
+# make readonly so won't mistakenly think it's okay to edit it
 readme:
-	${EMACS} --script make-readme-markdown.el <${PACKAGE}.el >README.md
+	rm -f README.md
+	${EMACS} --script make-readme-markdown.el <${SOURCE} >README.md
+	attrib +r README.md
 	head -5 README.md
-	tail -5 README.md
-#	cat README.md
+	tail -9 README.md
 
 
+# make package tar
 PACKAGE_DIR := ${PACKAGE}-${VERSION}
 PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
-
 tar:
+	rm -rdf ${PACKAGE_DIR}
 	mkdir ${PACKAGE_DIR}
-	cp ${PACKAGE}.el ${PACKAGE}-pkg.el ${PACKAGE_DIR}
+	cp ${SOURCE} ${PACKAGE_DIR}
+	cp ${PKG} ${PACKAGE_DIR}
 	cp ${CONTENTS} ${PACKAGE_DIR}
 	tar -cf ${PACKAGE_TAR} ${PACKAGE_DIR}
 	tar -tvf ${PACKAGE_TAR}
 
+#melpa:
+#	cp ${PACKAGE_TAR} ${MELPA}
+
 clean:
 	rm -f *.elc
 	rm -f README.md
-	rm -f ${PACKAGE}-pkg.el
+	rm -f ${PKG}
 	rm -f ${PACKAGE_TAR}
 	rm -rdf ${PACKAGE_DIR}
 
+clean-elc:
+	rm -f *.elc
 
 
-.PHONY: all help test readme pkg compile tar clean
+.PHONY: help info test all compile pkg readme tar clean clean-elc
 
 # end
