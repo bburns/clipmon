@@ -4,10 +4,10 @@
 ;; Copyright (c) 2014-2015 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
-;; Homepage: https://github.com/bburns/clipmon
+;; URL: https://github.com/bburns/clipmon
 ;; Keywords: convenience
 ;; License: GPLv3
-;; Version: 20150102
+;; Version: 20150108
 ;;
 ;; This package is NOT part of GNU Emacs.
 ;;
@@ -23,9 +23,8 @@
 ;; This is helpful when taking notes from a webpage, for example - just copy the
 ;; text you want to save and it will be pasted into Emacs. Works best when
 ;; paired with an autocopy feature or addon for the browser, e.g. AutoCopy 2 for
-;; Firefox [1] - then you can just select text to copy it to the clipboard.
-;;
-;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
+;; Firefox [https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/] -
+;; then you can just select text to copy it to the clipboard.
 ;;
 ;;
 ;;;; Usage
@@ -82,11 +81,9 @@
 ;;;; Sound File
 ;; ----------------------------------------------------------------------------
 ;;
-;; The sound file was created with Audacity [2] - it's a 2kHz sine wave with
-;; several overtones, and slightly quiet so it doesn't get too annoying when
-;; you're taking a lot of notes (hopefully).
-;;
-;; [2] http://audacity.sourceforge.net/
+;; The sound file was created with Audacity [http://audacity.sourceforge.net/].
+;; It's a 2kHz sine wave with several overtones, and not too loud so it doesn't
+;; get annoying if you're taking a lot of notes - hopefully!
 ;;
 ;;
 ;;;; License
@@ -116,7 +113,7 @@
   "Clipboard monitor - automatically paste clipboard changes."
   :group 'convenience
   :group 'killing
-  :package-version '(clipmon . "20150102"))
+  :package-version '(clipmon . "20150108"))
 
 
 (defcustom clipmon-cursor-color "red"
