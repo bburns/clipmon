@@ -29,15 +29,16 @@
 ### but don't cause the creation of a separate variation
 ###
 
-env:
-  matrix:
-#   - EMACS=xemacs21
+#    - EMACS=xemacs21
 #    - EMACS=emacs22
 #    - EMACS=emacs23
-    - EMACS=emacs24
 #    - EMACS=emacs-snapshot
-  global:
-    - SOME_TOKEN=some_value
+
+# env:
+#   matrix:
+#     - EMACS=emacs24
+#   global:
+#     - SOME_TOKEN=some_value
 
 
 ###
@@ -64,9 +65,9 @@ env:
 ### comma-separated list of branches to be reflected in the badge).
 ###
 
- branches:
-   only:
-     - master
+# branches:
+#   only:
+#     - master
 
 
 ###
@@ -92,12 +93,14 @@ env:
 # before_install:
 #   - git submodule --quiet update --init --recursive
 
-install:
+# install:
 # - if [ "$EMACS" = 'xemacs21' ]; then
 #       sudo apt-get -qq update &&
 #       sudo apt-get -qq -f install &&
 #       sudo apt-get -qq install xemacs21-basesupport xemacs21-basesupport-el xemacs21-supportel xemacs21-support xemacs21-mulesupport-el xemacs21-mulesupport xemacs21-mule-canna-wnn xemacs21-mule-canna-wnn;
 #   fi
+
+install:
   - if [ "$EMACS" = 'emacs22' ]; then
         curl -Os http://security.ubuntu.com/ubuntu/pool/universe/e/emacs22/emacs22_22.2-0ubuntu9_i386.deb &&
         curl -Os http://security.ubuntu.com/ubuntu/pool/universe/e/emacs22/emacs22-bin-common_22.2-0ubuntu9_i386.deb &&
@@ -148,8 +151,7 @@ before_script:
 
 # script:
 #   $EMACS --version && ( test "$EMACS" != 'emacs22' && make test EMACS="$EMACS" || make test-batch EMACS="$EMACS" )
-script:
-  make test
+script: make test
 
 ###
 ### settings
@@ -157,6 +159,10 @@ script:
 
 notifications:
   email: true
+
+
+# email:
+#   - bburns.km@gmail.com
 
 #
 # Emacs
