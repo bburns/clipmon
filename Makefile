@@ -65,7 +65,11 @@ info:
 
 
 test: compile
+	@echo ""
+	@emacs -nw --version
+	@echo ""
 	${EMACS} -Q -batch -L . -l ${TEST} -f ert-run-tests-batch-and-exit
+
 
 all: info clean compile test pkg readme tar
 
