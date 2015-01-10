@@ -7,7 +7,7 @@ before_install:
   
   # PPA for stable Emacs packages, only up to 24.3
   # https://launchpad.net/~cassou/+archive/ubuntu/emacs
-  # - sudo add-apt-repository -y ppa:cassou/emacs
+  - sudo add-apt-repository -y ppa:cassou/emacs
   
   # PPA for Emacs 24.4
   # https://launchpad.net/~andreas-h/+archive/ubuntu/emacs
@@ -22,8 +22,8 @@ before_install:
   - sudo apt-get install -qq -yy ${EMACS}-nox ${EMACS}-el
 
 env:
-  # - EMACS=emacs23
-  # - EMACS=emacs24
+  # - EMACS=emacs23 # fails, can't load ert
+  - EMACS=emacs24
   - EMACS=emacs-snapshot
 
 
