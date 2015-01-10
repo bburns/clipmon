@@ -1,7 +1,7 @@
-;;; clipmon.el --- clipboard monitor: automatically paste clipboard changes
+;;; clipmon.el --- clipboard monitor - automatically pastes clipboard changes
 ;;; About:
 ;;
-;; Copyright (c) 2014-2015 Brian Burns
+;; Copyright (c) 2015 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
@@ -85,7 +85,7 @@
 ;;
 ;; The sound file was created with Audacity [http://audacity.sourceforge.net/].
 ;; It's a 2kHz sine wave with several overtones, and not too loud so it doesn't
-;; get annoying if you're taking a lot of notes - hopefully!
+;; get annoying if you're taking a lot of notes - hopefully...
 ;;
 ;;
 ;;;; License

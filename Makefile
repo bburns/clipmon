@@ -1,23 +1,33 @@
+# --------------------------------------------------------------------------------
+# makefile for emacs packages
+# --------------------------------------------------------------------------------
 
-# makefile for packages, a work in progress
 
-
-# set name of package and any extra contents for .tar file
+# set name of package
 PACKAGE = clipmon
+
+# set any extra contents for the .tar file here
 CONTENTS := clipmon.wav
 
 
-# rest should be reusable
+# --------------------------------------------------------------------------------
 
+# programs
+EMACS = emacs
+CASK = cask
+
+# files
 SOURCE = ${PACKAGE}.el
 PKG = ${PACKAGE}-pkg.el
 TEST = ${PACKAGE}-test.el
+PACKAGE_DIR := ${PACKAGE}-${VERSION}
+PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
 
-
+# parse package metadata
+# currently handles only one keyword, and no dependencies
+# eg need :keywords '("speed" "convenience"))
 #. better to call an elisp fn to parse this stuff and make -pkg file
-#. currently handles only one keyword, and no dependencies
-
-# using grep -P for perl regexp, -o to just output match
+# note: grep -P for perl regexp, -o to just output match
 # ?<= is the look-behind operator - match is not included in output
 DESCRIPTION  != grep ";;; ${SOURCE} --- " ${SOURCE} | grep -Po "(?<= --- ).+"
 VERSION      != grep ";; Version:"        ${SOURCE} | grep -Po [0-9]+
@@ -27,14 +37,7 @@ KEYWORDS := "\"${KEYWORDS}\""
 DEPENDENCIES = "nil"
 
 
-EMACS = emacs
-CASK = cask
-# MELPA = c:/users/bburns/dropbox/emacs/projects/melpa/packages
-
-
-# include travis.ci makefile
-# include Makefile_travis
-
+# --------------------------------------------------------------------------------
 
 
 help:
@@ -65,17 +68,17 @@ test: compile
 	${EMACS} -Q -batch -L . -l ${TEST} -f ert-run-tests-batch
 
 
-all: clean compile pkg readme tar
+all: info clean compile test pkg readme tar
 
+
+# need -L . so tests can (require 'clipmon)
 compile:
 	${EMACS} -Q -batch -L . --eval="(byte-compile-file \"${SOURCE}\")"
 
-# need -L . so tests can (require 'clipmon)
-compile1:
-	${EMACS} -Q -batch -L . -f batch-byte-compile *.el
+# compile1:
+# 	${EMACS} -Q -batch -L . -f batch-byte-compile *.el
 
 
-# :keywords '("speed" "convenience"))
 pkg:
 	@echo "(define-package \"${PACKAGE}\" \"${VERSION}\"" > ${PKG}
 	@echo "  \"${DESCRIPTION}\""        >> ${PKG}
@@ -85,13 +88,13 @@ pkg:
 	cat ${PKG}
 
 # cask is asynchronous
-pkg0:
-	@echo "Running cask - hit Enter when done..."
-	${CASK} pkg-file
-	read
-	cat ${PKG}
+# pkg0:
+# 	@echo "Running cask - hit Enter when done..."
+# 	${CASK} pkg-file
+# 	read
+# 	cat ${PKG}
 
-# make readonly so won't mistakenly think it's okay to edit it
+
 readme:
 	rm -f README.md
 	${EMACS} --script make-readme.el <${SOURCE} >README.md
@@ -100,9 +103,6 @@ readme:
 	tail -9 README.md
 
 
-# make package tar
-PACKAGE_DIR := ${PACKAGE}-${VERSION}
-PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
 tar:
 	rm -rdf ${PACKAGE_DIR}
 	mkdir ${PACKAGE_DIR}
@@ -112,8 +112,6 @@ tar:
 	tar -cf ${PACKAGE_TAR} ${PACKAGE_DIR}
 	tar -tvf ${PACKAGE_TAR}
 
-#melpa:
-#	cp ${PACKAGE_TAR} ${MELPA}
 
 clean:
 	rm -f *.elc
@@ -122,10 +120,12 @@ clean:
 	rm -f ${PACKAGE_TAR}
 	rm -rdf ${PACKAGE_DIR}
 
+
 clean-elc:
 	rm -f *.elc
 
 
 .PHONY: help info test all compile pkg readme tar clean clean-elc
+
 
 # end

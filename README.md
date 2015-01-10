@@ -74,7 +74,7 @@ Sound File
 
 The sound file was created with Audacity [http://audacity.sourceforge.net/].
 It's a 2kHz sine wave with several overtones, and not too loud so it doesn't
-get annoying if you're taking a lot of notes - hopefully!
+get annoying if you're taking a lot of notes - hopefully...
 
 
 License
