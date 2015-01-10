@@ -11,11 +11,11 @@ before_install:
   
   # PPA for Emacs 24.4
   # https://launchpad.net/~andreas-h/+archive/ubuntu/emacs
-  - sudo add-apt-repository -y ppa:andreas-h/emacs
+  # - sudo add-apt-repository -y ppa:andreas-h/emacs
   
   # PPA for Emacs nightlies, 25.1?
   # https://launchpad.net/~ubuntu-elisp/+archive/ubuntu/ppa
-  - sudo add-apt-repository -y ppa:ubuntu-elisp/ppa
+  # - sudo add-apt-repository -y ppa:ubuntu-elisp/ppa
   
   # Update and install the Emacs for our environment
   - sudo apt-get update -qq
@@ -23,8 +23,8 @@ before_install:
 
 env:
   - EMACS=emacs23
-  - EMACS=emacs24
-  - EMACS=emacs-snapshot
+  # - EMACS=emacs24
+  # - EMACS=emacs-snapshot
 
 
 email:
