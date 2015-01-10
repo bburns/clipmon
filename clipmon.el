@@ -20,13 +20,10 @@
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and pastes
 ;; any changes into the current location in Emacs.
 ;;
-;; This helps when taking notes from a webpage - just copy the text you want to
-;; save and it will be pasted into Emacs. Works best when paired with an
-;; autocopy feature or addon for the browser, e.g. AutoCopy 2 for Firefox [1] -
-;; then you can just select text to copy it to the clipboard.
-;;
-;;
-;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
+;; This is good for taking notes from a webpage, for example - just copy the
+;; text you want to save and it will be pasted into Emacs. Typically you just
+;; turn it on when you need to copy a lot of text from elsewhere, then turn it
+;; off when done.
 ;;
 ;;
 ;;;; Usage
@@ -42,6 +39,12 @@
 ;;
 ;; You can still use the Emacs kill-ring with yank and pull as usual while
 ;; clipmon is on, since it only looks at the system clipboard.
+;;
+;; It works best when paired with an autocopy feature or addon for the browser,
+;; e.g. AutoCopy 2 for Firefox [1] - then you can just select text to copy it to
+;; the clipboard.
+;;
+;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 ;;
 ;;
 ;;;; Options
