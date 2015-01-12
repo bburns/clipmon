@@ -19,9 +19,7 @@ CASK = cask
 # files
 SOURCE = ${PACKAGE}.el
 PKG = ${PACKAGE}-pkg.el
-TEST = ${PACKAGE}-test.el
-PACKAGE_DIR := ${PACKAGE}-${VERSION}
-PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
+TEST = test/${PACKAGE}-test.el
 
 # parse package metadata
 # currently handles only one keyword, and no dependencies
@@ -36,6 +34,9 @@ KEYWORDS     != grep ";; Keywords:"       ${SOURCE} | grep -Po "(?<=;; Keywords:
 KEYWORDS := "\"${KEYWORDS}\""
 DEPENDENCIES = "nil"
 
+# for tar
+PACKAGE_DIR := ${PACKAGE}-${VERSION}
+PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
 
 # --------------------------------------------------------------------------------
 
@@ -74,12 +75,11 @@ test: compile
 all: info clean compile test pkg readme tar
 
 
-# need -L . so tests can (require 'clipmon)
+# make sure everything compiles, then remove .elc files
+# need -L . so test can (require 'clipmon)
 compile:
-	${EMACS} -Q -batch -L . --eval="(byte-compile-file \"${SOURCE}\")"
-
-# compile1:
-# 	${EMACS} -Q -batch -L . -f batch-byte-compile *.el
+	${EMACS} -Q --batch -L . -f batch-byte-compile *.el test/*.el
+	rm -f *.elc test/*.elc
 
 
 pkg:
@@ -106,6 +106,7 @@ readme:
 	tail -9 README.md
 
 
+# melpa does this automatically
 tar:
 	rm -rdf ${PACKAGE_DIR}
 	mkdir ${PACKAGE_DIR}
@@ -113,12 +114,11 @@ tar:
 	cp ${PKG} ${PACKAGE_DIR}
 	cp ${CONTENTS} ${PACKAGE_DIR}
 	tar -cf ${PACKAGE_TAR} ${PACKAGE_DIR}
+	rm -rdf ${PACKAGE_DIR}
 	tar -tvf ${PACKAGE_TAR}
-
 
 clean:
 	rm -f *.elc
-	rm -f README.md
 	rm -f ${PKG}
 	rm -f ${PACKAGE_TAR}
 	rm -rdf ${PACKAGE_DIR}
