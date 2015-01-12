@@ -20,10 +20,10 @@
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and pastes
 ;; any changes into the current location in Emacs.
 ;;
-;; Use it for taking notes from a webpage, for example - just copy the text you
-;; want to save and it will be pasted into Emacs. Typically you just turn it on
-;; when you need to copy a lot of text from elsewhere, then turn it off when
-;; done.
+;; You can use it for taking notes from a webpage, for example - just copy the
+;; text you want to save and it will be pasted into Emacs. Typically you just
+;; turn it on when you need to copy a lot of text from elsewhere, then turn it
+;; off when done.
 ;;
 ;;
 ;;;; Usage
@@ -215,7 +215,7 @@ E.g. to make the text lowercase before pasting,
   "Path to clipmon install folder.")
 
 (defconst clipmon--included-sound-file
-  (expand-file-name "clipmon.wav" clipmon--folder)
+  (expand-file-name "sounds/clipmon.wav" clipmon--folder)
   "Path to included audio file.")
 
 
@@ -320,7 +320,7 @@ Otherwise stop clipmon if it's been idle a while."
 ;; ----------------------------------------------------------------------------
 
 (defalias 'clipboard-contents 'x-get-selection-value
-  "Get contents of system clipboard, as opposed to Emacs's kill ring.
+  "Get contents of system clipboard (as opposed to Emacs's kill ring).
 Returns a string, or nil.")
 
 

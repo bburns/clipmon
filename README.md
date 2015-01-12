@@ -9,7 +9,7 @@ Description
 Clipmon is a clipboard monitor - it watches the system clipboard and pastes
 any changes into the current location in Emacs.
 
-This is good for taking notes from a webpage, for example - just copy the
+You can use it for taking notes from a webpage, for example - just copy the
 text you want to save and it will be pasted into Emacs. Typically you just
 turn it on when you need to copy a lot of text from elsewhere, then turn it
 off when done.
@@ -29,9 +29,10 @@ If you switch back to Emacs, it should have pasted the text into your buffer.
 You can still use the Emacs kill-ring with yank and pull as usual while
 clipmon is on, since it only looks at the system clipboard.
 
-It works best when paired with an autocopy feature or addon for the browser,
-e.g. AutoCopy 2 for Firefox [1] - then you can just select text to copy it to
-the clipboard.
+It's also helpful to have an autocopy feature or addon for the browser, e.g.
+AutoCopy 2 for Firefox [1] - then you can just select text to copy it to the
+clipboard.
+
 
 [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 
@@ -76,8 +77,8 @@ Sound File
 ----------------------------------------------------------------------------
 
 The sound file was created with Audacity [http://audacity.sourceforge.net/].
-It's a 2kHz sine wave with several overtones, and not too loud so it doesn't
-get annoying if you're taking a lot of notes - hopefully...
+It's not too loud so it doesn't get annoying if you're taking a lot of notes
+- hopefully...
 
 
 License

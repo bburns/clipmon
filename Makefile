@@ -1,30 +1,26 @@
-# --------------------------------------------------------------------------------
-# makefile for emacs packages
-# --------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# makefile for emacs .tar packages - partially working
+# ------------------------------------------------------------------------------
 
-
-# set name of package
+# name of package
 PACKAGE = clipmon
 
-# set any extra contents for the .tar file here
-CONTENTS := sounds/clipmon.wav
+# any extra files or folders for the .tar file
+CONTENTS := sounds
 
+# ------------------------------------------------------------------------------
 
-# --------------------------------------------------------------------------------
-
-# programs
 EMACS = emacs
 CASK = cask
 
-# files
 SOURCE = ${PACKAGE}.el
-PKG = ${PACKAGE}-pkg.el
 TEST = test/${PACKAGE}-test.el
 
 # parse package metadata
 # currently handles only one keyword, and no dependencies
 # eg need :keywords '("speed" "convenience"))
-#. better to call an elisp fn to parse this stuff and make -pkg file
+#. better to call an elisp fn to parse this stuff and make -pkg file,
+# or use cask.
 # note: grep -P for perl regexp, -o to just output match
 # ?<= is the look-behind operator - match is not included in output
 DESCRIPTION  != grep ";;; ${SOURCE} --- " ${SOURCE} | grep -Po "(?<= --- ).+"
@@ -35,11 +31,12 @@ KEYWORDS := "\"${KEYWORDS}\""
 DEPENDENCIES = "nil"
 
 # for tar
+PKG = ${PACKAGE}-pkg.el
 PACKAGE_DIR := ${PACKAGE}-${VERSION}
 PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
 TAR_DIR := tars
 
-# --------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 help:
@@ -99,6 +96,7 @@ pkg:
 # 	cat ${PKG}
 
 
+# generate a readme file from the commentary in the source file
 readme:
 	rm -f README.md
 	${EMACS} --script make-readme.el <${SOURCE} >README.md
@@ -113,13 +111,14 @@ tar:
 	mkdir ${PACKAGE_DIR}
 	cp ${SOURCE} ${PACKAGE_DIR}
 	cp ${PKG} ${PACKAGE_DIR}
-	cp ${CONTENTS} ${PACKAGE_DIR}
+	cp -r ${CONTENTS} ${PACKAGE_DIR}
 	tar -cf ${PACKAGE_TAR} ${PACKAGE_DIR}
 	rm -rdf ${PACKAGE_DIR}
 	tar -tvf ${PACKAGE_TAR}
 	mkdir -p ${TAR_DIR}
 	mv ${PACKAGE_TAR} ${TAR_DIR}
 	ls -l ${TAR_DIR}
+
 
 clean:
 	rm -f *.elc
