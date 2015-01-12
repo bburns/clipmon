@@ -37,6 +37,7 @@ DEPENDENCIES = "nil"
 # for tar
 PACKAGE_DIR := ${PACKAGE}-${VERSION}
 PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
+TAR_DIR := tars
 
 # --------------------------------------------------------------------------------
 
@@ -116,6 +117,9 @@ tar:
 	tar -cf ${PACKAGE_TAR} ${PACKAGE_DIR}
 	rm -rdf ${PACKAGE_DIR}
 	tar -tvf ${PACKAGE_TAR}
+	mkdir -p ${TAR_DIR}
+	mv ${PACKAGE_TAR} ${TAR_DIR}
+	ls -l ${TAR_DIR}
 
 clean:
 	rm -f *.elc
