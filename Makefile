@@ -7,7 +7,7 @@
 PACKAGE = clipmon
 
 # set any extra contents for the .tar file here
-CONTENTS := clipmon.wav
+CONTENTS := sounds/clipmon.wav
 
 
 # --------------------------------------------------------------------------------
