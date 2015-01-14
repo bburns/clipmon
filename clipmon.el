@@ -161,9 +161,9 @@ so this will remove it."
   :type 'boolean)
 
 (defcustom clipmon-remove-regexp
-  "\\[[0-9]+\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
+  "\\[[0-9][0-9]?[0-9]?\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
   "Any text matching this regexp will be removed before pasting.
-e.g. Wikipedia-style references - [3], [12]."
+e.g. Wikipedia-style references with 1-3 digits - [3], [115]."
   :group 'clipmon
   :type 'regexp)
 
