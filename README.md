@@ -12,26 +12,43 @@ any changes into the current location in Emacs.
 You can use it for taking notes from a webpage, for example - just copy the
 text you want to save and it will be pasted into Emacs. Typically you just
 turn it on when you need to copy a lot of text from elsewhere, then turn it
-off when done.
+off when you're done.
+
+
+Installation
+----------------------------------------------------------------------------
+
+It's simplest to use the package manager:
+
+    M-x package-install <return> clipmon <return>
+
+It will then be ready to use, and will also be loaded automatically the next
+time you start Emacs.
 
 
 Usage
 ----------------------------------------------------------------------------
 
-Make a key-binding like the following to turn clipmon on and off:
+Add something like this to your .emacs file to turn clipmon on and off. You
+can also evaluate it now by hitting C-x C-e after the expression to set the
+key:
 
     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
 
-Then turn it on and go to another application and copy some text to the
-clipboard - clipmon should detect it after a second or two, and make a sound.
-If you switch back to Emacs, it should have pasted the text into your buffer.
+To try it out, turn it on, then go to another application and copy some text
+to the clipboard - clipmon should detect it after a second or two and make a
+sound. If you switch back to Emacs, it should have pasted the text into your
+buffer.
 
-You can still use the Emacs kill-ring with yank and pull as usual while
-clipmon is on, since it only looks at the system clipboard.
+You can still yank and pull text in Emacs as usual while clipmon is on, since
+it only looks at the system clipboard.
 
 It's also helpful to have an autocopy feature or addon for the browser, e.g.
 AutoCopy 2 for Firefox [1] - then you can just select text to copy it to the
 clipboard.
+
+If no change is detected after `clipmon-timeout` minutes, clipmon will turn
+itself off automatically, with a beep.
 
 
 [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
@@ -40,45 +57,36 @@ clipboard.
 Options
 ----------------------------------------------------------------------------
 
-Once started, clipmon checks the clipboard for changes every
-`clipmon-interval` seconds (default 2). If no change is detected after
-`clipmon-timeout` minutes (default 5), clipmon will turn itself off
-automatically.
+There are various options you can set with customize (hit C-x C-e after this):
+    (customize-group 'clipmon)
 
-The cursor color can be set with `clipmon-cursor-color` - eg "red", or nil
-for no change.
+or set them in your .emacs file - these are the default values:
+    (setq clipmon-cursor-color "red")  ; color for cursor when clipmon is on
+    (setq clipmon-sound t)             ; t for included beep, or path or nil
+    (setq clipmon-interval 2)          ; time interval to check clipboard (secs)
+    (setq clipmon-timeout 5)           ; stop if no activity after n minutes
 
-A sound can be played on each change, and on starting and stopping clipmon.
-The sound can be set with `clipmon-sound` - this can be t for an included
-sound file (a quietish beep), a path to a sound file (.wav or .au), or nil
-for no sound.
+Transforms on the clipboard text are performed in this order:
+    (setq clipmon-trim-string t)          ; remove leading whitespace
+    (setq clipmon-remove-regexp           ; remove text matching this regexp
+          "\\[[0-9][0-9]?[0-9]?\\]\\|\\[citation needed\\]\\|\\[by whom?\\]")
+    (setq clipmon-prefix "")              ; add to start of text
+    (setq clipmon-suffix "\n\n")          ; add to end of text
+    (setq clipmon-transform-function nil) ; additional transform function
 
-When selecting text to copy, it's sometimes difficult to avoid grabbing a
-leading space - to remove these from the text, set `clipmon-trim-string` to t
-(on by default).
+For the most flexibility, set `clipmon-transform-function` to a function that
+takes the clipboard text and returns a modified version - e.g. to make the
+text lowercase before pasting,
 
-To filter the text some more set `clipmon-remove-regexp` - it will remove any
-matching text before pasting. By default it is set to remove Wikipedia-style
-references, e.g. "[3]".
-
-You can specify strings to add to the start and end of the text, with
-`clipmon-prefix` and `clipmon-suffix`. By default the suffix is set to two
-newlines, which will leave a blank line in between entries.
-
-For any more customization, set `clipmon-transform-function` to a function
-that takes the clipboard text and returns a modified version - e.g. to make
-the text lowercase before pasting,
    (setq clipmon-transform-function (lambda (s) (downcase s)))
-
-See all options here: (customize-group 'clipmon)
 
 
 Sound File
 ----------------------------------------------------------------------------
 
 The sound file was created with Audacity [http://audacity.sourceforge.net/].
-It's not too loud so it doesn't get annoying if you're taking a lot of notes
-- hopefully...
+It's not too loud so hopefully it doesn't get annoying when you're taking a
+lot of notes...
 
 
 License
@@ -103,7 +111,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Author: Brian Burns <bburns.km@gmail.com>  
 URL: https://github.com/bburns/clipmon  
-Version: 20150108  
+Version: 20150114  
 
 This file was generated from commentary in clipmon.el.
 
