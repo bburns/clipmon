@@ -226,7 +226,7 @@ E.g. to make the text lowercase before pasting,
   (if clipmon--on
       (message "Clipboard monitor already running.")
     ; initialize
-    (setq clipmon--previous-contents (clipboard-contents))
+    (setq clipmon--previous-contents (clipmon--clipboard-contents))
     (setq clipmon--timeout-start (current-time))
     (setq clipmon--timer
           (run-at-time nil clipmon-interval 'clipmon--check-clipboard))
@@ -263,12 +263,12 @@ E.g. to make the text lowercase before pasting,
 (defun clipmon--check-clipboard ()
   "Check the clipboard and insert contents if changed.
 Otherwise stop clipmon if it's been idle a while."
-  (let ((s (clipboard-contents))) ; s may actually be nil here
+  (let ((s (clipmon--clipboard-contents))) ; s may actually be nil here
     (if (and s (not (string-equal s clipmon--previous-contents))) ; if changed
         (clipmon--on-clipboard-change s)
         ; otherwise stop monitor if it's been idle a while
         (if clipmon-timeout
-            (let ((idletime (seconds-since clipmon--timeout-start)))
+            (let ((idletime (clipmon--seconds-since clipmon--timeout-start)))
               (when (> idletime (* 60 clipmon-timeout))
                 (clipmon-stop)
                 (message
@@ -288,7 +288,7 @@ Otherwise stop clipmon if it's been idle a while."
 
 (defun clipmon--transform-text (s)
   "Apply transformations to clipboard text."
-  (if clipmon-trim-string (setq s (trim-left s)))
+  (if clipmon-trim-string (setq s (clipmon--trim-left s)))
   (if clipmon-remove-regexp
       (setq s (replace-regexp-in-string clipmon-remove-regexp "" s)))
   (if clipmon-prefix (setq s (concat clipmon-prefix s)))
@@ -309,17 +309,17 @@ Otherwise stop clipmon if it's been idle a while."
 ;;;; Library functions
 ;; ----------------------------------------------------------------------------
 
-(defalias 'clipboard-contents 'x-get-selection-value
+(defalias 'clipmon--clipboard-contents 'x-get-selection-value
   "Get contents of system clipboard (as opposed to Emacs's kill ring).
 Returns a string, or nil.")
 
 
-(defun trim-left (s)
-  "Remove any leading spaces from s."
+(defun clipmon--trim-left (s)
+  "Remove leading spaces from s."
   (replace-regexp-in-string  "^[ \t]+"  ""  s))
 
 
-(defun seconds-since (time)
+(defun clipmon--seconds-since (time)
   "Return number of seconds elapsed since the given time.
 Time should be in Emacs time format (see `current-time').
 Valid for up to 2**16 seconds = 65536 secs = 18hrs."
