@@ -1,14 +1,26 @@
-;;; clipmon.el --- clipboard monitor - automatically pastes clipboard changes
+;;; clipmon.el --- Clipboard monitor - automatically pastes clipboard changes
 ;;
 ;; Copyright (c) 2015 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
 ;; Keywords: convenience
-;; License: GPLv3 (at end of commentary)
 ;; Version: 20150114
 ;;
 ;; This package is NOT part of GNU Emacs.
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
 ;;
 ;;; Commentary:
@@ -47,7 +59,7 @@
 ;;
 ;; To try it out, turn it on, then go to another application and copy some text
 ;; to the clipboard - clipmon should detect it after a second or two and make a
-;; sound. If you switch back to Emacs, it should have pasted the text into your
+;; sound. If you switch back to Emacs, you should have some new text in your
 ;; buffer.
 ;;
 ;; You can still yank and pull text in Emacs as usual while clipmon is on, since
@@ -67,28 +79,25 @@
 ;;;; Options
 ;; ----------------------------------------------------------------------------
 ;;
-;; There are various options you can set with customize (hit C-x C-e after this):
+;; There are various options you can set with customize:
+;;
 ;;     (customize-group 'clipmon)
 ;;
 ;; or set them in your .emacs file - these are the default values:
+;;
 ;;     (setq clipmon-cursor-color "red")  ; color for cursor when clipmon is on
 ;;     (setq clipmon-sound t)             ; t for included beep, or path or nil
 ;;     (setq clipmon-interval 2)          ; time interval to check clipboard (secs)
 ;;     (setq clipmon-timeout 5)           ; stop if no activity after n minutes
 ;;
-;; Transforms on the clipboard text are performed in this order:
+;; transforms on the clipboard text are performed in this order:
+;;
 ;;     (setq clipmon-trim-string t)          ; remove leading whitespace
 ;;     (setq clipmon-remove-regexp           ; remove text matching this regexp
 ;;           "\\[[0-9][0-9]?[0-9]?\\]\\|\\[citation needed\\]\\|\\[by whom?\\]")
 ;;     (setq clipmon-prefix "")              ; add to start of text
 ;;     (setq clipmon-suffix "\n\n")          ; add to end of text
 ;;     (setq clipmon-transform-function nil) ; additional transform function
-;;
-;; For the most flexibility, set `clipmon-transform-function' to a function that
-;; takes the clipboard text and returns a modified version - e.g. to make the
-;; text lowercase before pasting,
-;;
-;;    (setq clipmon-transform-function (lambda (s) (downcase s)))
 ;;
 ;;
 ;;;; Sound File
@@ -97,23 +106,6 @@
 ;; The sound file was created with Audacity [http://audacity.sourceforge.net/].
 ;; It's not too loud so hopefully it doesn't get annoying when you're taking a
 ;; lot of notes...
-;;
-;;
-;;;; License
-;; ----------------------------------------------------------------------------
-;;
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
 ;;
 ;;
@@ -131,7 +123,6 @@
 
 (defcustom clipmon-cursor-color "red"
   "Color to set cursor when clipmon is on. Set to nil for no change."
-  :group 'clipmon
   :type 'color)
 
 (defcustom clipmon-sound t
@@ -141,20 +132,17 @@ Use t for the included sound file (see
 audio file - Emacs can play .wav or .au files."
   ; Note: can't use `ding' here because it doesn't make a sound when Emacs
   ; doesn't have focus.
-  :group 'clipmon
   :type '(radio
           (string :tag "Audio file (.wav or .au)")
           (boolean :tag "Included sound file")))
 
 (defcustom clipmon-interval 2
   "Interval for checking clipboard, in seconds."
-  :group 'clipmon
   :type 'integer)
 
 (defcustom clipmon-timeout 5
   "Stop the timer if no clipboard activity after this many minutes.
 Set to nil for no timeout."
-  :group 'clipmon
   :type 'integer)
 
 
@@ -164,26 +152,22 @@ Set to nil for no timeout."
   "Remove leading whitespace from string before pasting if non-nil.
 Often it's hard to select text without grabbing a leading space,
 so this will remove it."
-  :group 'clipmon
   :type 'boolean)
 
 (defcustom clipmon-remove-regexp
   "\\[[0-9][0-9]?[0-9]?\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
   "Any text matching this regexp will be removed before pasting.
 e.g. Wikipedia-style references with 1-3 digits - [3], [115]."
-  :group 'clipmon
   :type 'regexp)
 
 (defcustom clipmon-prefix ""
   "String to add to start of clipboard contents before pasting."
-  :group 'clipmon
   :type 'string)
 
 (defcustom clipmon-suffix "\n\n"
   "String to add to end of clipboard contents before pasting.
 Default is two newlines, which leaves a blank line between clips.
 To add a newline, type C-q C-j."
-  :group 'clipmon
   :type 'string)
 
 (defcustom clipmon-transform-function nil
@@ -191,7 +175,6 @@ To add a newline, type C-q C-j."
 Receives one argument, the clipboard text - should return the changed text.
 E.g. to make the text lowercase before pasting,
     (setq clipmon-transform-function (lambda (s) (downcase s)))"
-  :group 'clipmon
   :type 'function
   :risky t)
 
