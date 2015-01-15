@@ -32,9 +32,16 @@
 ;; any changes into the current location in Emacs.
 ;;
 ;; You can use it for taking notes from a webpage, for example - just copy the
-;; text you want to save and it will be pasted into Emacs. Typically you just
-;; turn it on when you need to copy a lot of text from elsewhere, then turn it
-;; off when you're done.
+;; text you want to save and it will be pasted into Emacs. Typically you turn it
+;; on when you need to copy a lot of text from elsewhere, then turn it off when
+;; you're done.
+;;
+;; It also helps to have an autocopy feature or addon for the browser, e.g.
+;; AutoCopy 2 for Firefox [1] - then you can just select text to copy it to the
+;; clipboard.
+;;
+;;
+;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 ;;
 ;;
 ;;;; Installation
@@ -51,29 +58,20 @@
 ;;;; Usage
 ;; ----------------------------------------------------------------------------
 ;;
-;; Add something like this to your .emacs file to turn clipmon on and off. You
-;; can also evaluate it now by hitting C-x C-e after the expression to set the
-;; key:
+;; Add something like this to your .emacs file to turn clipmon on and off:
 ;;
 ;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
 ;;
-;; To try it out, turn it on, then go to another application and copy some text
-;; to the clipboard - clipmon should detect it after a second or two and make a
-;; sound. If you switch back to Emacs, you should have some new text in your
+;; Then try it out - turn it on, go to another application and copy some text to
+;; the clipboard - clipmon should detect it after a second or two and make a
+;; sound. If you switch back to Emacs, there should be some new text in your
 ;; buffer.
 ;;
 ;; You can still yank and pull text in Emacs as usual while clipmon is on, since
 ;; it only looks at the system clipboard.
 ;;
-;; It's also helpful to have an autocopy feature or addon for the browser, e.g.
-;; AutoCopy 2 for Firefox [1] - then you can just select text to copy it to the
-;; clipboard.
-;;
 ;; If no change is detected after `clipmon-timeout' minutes, clipmon will turn
-;; itself off automatically, with a beep.
-;;
-;;
-;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
+;; itself off automatically.
 ;;
 ;;
 ;;;; Options
@@ -118,11 +116,12 @@
   "Clipboard monitor - automatically paste clipboard changes."
   :group 'convenience
   :group 'killing
-  :package-version '(clipmon . "20150108"))
+  :package-version '(clipmon . "20150114"))
 
 
 (defcustom clipmon-cursor-color "red"
   "Color to set cursor when clipmon is on. Set to nil for no change."
+  :group 'clipmon
   :type 'color)
 
 (defcustom clipmon-sound t
@@ -132,17 +131,20 @@ Use t for the included sound file (see
 audio file - Emacs can play .wav or .au files."
   ; Note: can't use `ding' here because it doesn't make a sound when Emacs
   ; doesn't have focus.
+  :group 'clipmon
   :type '(radio
           (string :tag "Audio file (.wav or .au)")
           (boolean :tag "Included sound file")))
 
 (defcustom clipmon-interval 2
   "Interval for checking clipboard, in seconds."
+  :group 'clipmon
   :type 'integer)
 
 (defcustom clipmon-timeout 5
   "Stop the timer if no clipboard activity after this many minutes.
 Set to nil for no timeout."
+  :group 'clipmon
   :type 'integer)
 
 
@@ -152,22 +154,26 @@ Set to nil for no timeout."
   "Remove leading whitespace from string before pasting if non-nil.
 Often it's hard to select text without grabbing a leading space,
 so this will remove it."
+  :group 'clipmon
   :type 'boolean)
 
 (defcustom clipmon-remove-regexp
   "\\[[0-9][0-9]?[0-9]?\\]\\|\\[citation needed\\]\\|\\[by whom?\\]"
   "Any text matching this regexp will be removed before pasting.
 e.g. Wikipedia-style references with 1-3 digits - [3], [115]."
+  :group 'clipmon
   :type 'regexp)
 
 (defcustom clipmon-prefix ""
   "String to add to start of clipboard contents before pasting."
+  :group 'clipmon
   :type 'string)
 
 (defcustom clipmon-suffix "\n\n"
   "String to add to end of clipboard contents before pasting.
 Default is two newlines, which leaves a blank line between clips.
 To add a newline, type C-q C-j."
+  :group 'clipmon
   :type 'string)
 
 (defcustom clipmon-transform-function nil
@@ -175,6 +181,7 @@ To add a newline, type C-q C-j."
 Receives one argument, the clipboard text - should return the changed text.
 E.g. to make the text lowercase before pasting,
     (setq clipmon-transform-function (lambda (s) (downcase s)))"
+  :group 'clipmon
   :type 'function
   :risky t)
 
@@ -205,7 +212,7 @@ E.g. to make the text lowercase before pasting,
   "Path to clipmon install folder.")
 
 (defconst clipmon--included-sound-file
-  (expand-file-name "sounds/clipmon.wav" clipmon--folder)
+  (expand-file-name "clipmon.wav" clipmon--folder)
   "Path to included audio file.")
 
 
@@ -315,7 +322,7 @@ Returns a string, or nil.")
 
 
 (defun clipmon--trim-left (s)
-  "Remove leading spaces from s."
+  "Remove leading spaces from string."
   (replace-regexp-in-string  "^[ \t]+"  ""  s))
 
 

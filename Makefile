@@ -6,7 +6,7 @@
 PACKAGE = clipmon
 
 # any extra files or folders for the .tar file
-CONTENTS := sounds
+CONTENTS := clipmon.wav
 
 # ------------------------------------------------------------------------------
 
