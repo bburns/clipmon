@@ -187,7 +187,7 @@ E.g. to make the text lowercase before pasting,
   '(menu-item "Clipboard monitor"
               clipmon-toggle ; function to call on click
               :help "Automatically paste changes from the clipboard." ; tooltip
-              :button (:toggle . clipmon--on)) ; show checkmark if variable nonnil
+              :button (:toggle . clipmon--on)) ; show checkmark on/off
   'blink-cursor-mode) ; add after this item
 
 
