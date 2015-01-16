@@ -333,8 +333,11 @@ Valid for up to 2**16 seconds = 65536 secs = 18hrs."
   (cadr (time-subtract (current-time) time)))
 
 
-;;;; Provide
+;;;; Footer
 
 (provide 'clipmon)
 
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 ;;; clipmon.el ends here
