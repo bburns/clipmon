@@ -1,4 +1,4 @@
-;;; clipmon.el --- Clipboard monitor - automatically pastes clipboard changes
+;;; clipmon.el --- Clipboard monitor - automatically paste clipboard changes
 ;;
 ;; Copyright (c) 2015 Brian Burns
 ;;
@@ -39,7 +39,6 @@
 ;; It also helps to have an autocopy feature or addon for the browser, e.g.
 ;; AutoCopy 2 for Firefox [1] - then you can just select text to copy it to the
 ;; clipboard.
-;;
 ;;
 ;; [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 ;;
@@ -106,14 +105,13 @@
 ;; lot of notes...
 ;;
 ;;
-;;
 ;;; Code:
 ;;
 ;;;; Public settings
 ;; ----------------------------------------------------------------------------
 
 (defgroup clipmon nil
-  "Clipboard monitor - automatically paste clipboard changes."
+  "Clipboard monitor - automatically pastes clipboard changes."
   :group 'convenience
   :group 'killing
   :package-version '(clipmon . "20150114"))
@@ -191,9 +189,9 @@ E.g. to make the text lowercase before pasting,
 
 ; add item to Options menu
 (define-key-after global-map [menu-bar options clipmon] ; path to new item
-  '(menu-item "Clipboard monitor"
+  '(menu-item "Clipboard monitor (paste changes)"
               clipmon-toggle ; function to call on click
-              :help "Automatically paste changes from the clipboard." ; tooltip
+              :help "Automatically paste changes from the system clipboard." ; tooltip
               :button (:toggle . clipmon--on)) ; show checkmark on/off
   'blink-cursor-mode) ; add after this item
 
