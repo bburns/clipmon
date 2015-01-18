@@ -18,7 +18,6 @@ It also helps to have an autocopy feature or addon for the browser, e.g.
 AutoCopy 2 for Firefox [1] - then you can just select text to copy it to the
 clipboard.
 
-
 [1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
 
 
@@ -82,7 +81,6 @@ Sound File
 The sound file was created with Audacity [http://audacity.sourceforge.net/].
 It's not too loud so hopefully it doesn't get annoying when you're taking a
 lot of notes...
-
 
 
 ----
