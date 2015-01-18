@@ -112,7 +112,7 @@ tar:
 	cp ${SOURCE} ${PACKAGE_DIR}
 	cp ${PKG} ${PACKAGE_DIR}
 	cp -r ${CONTENTS} ${PACKAGE_DIR}
-	tar -cf ${PACKAGE_TAR} ${PACKAGE_DIR}
+	tar -cvf ${PACKAGE_TAR} ${PACKAGE_DIR}
 	rm -rdf ${PACKAGE_DIR}
 	tar -tvf ${PACKAGE_TAR}
 	mkdir -p ${TAR_DIR}
