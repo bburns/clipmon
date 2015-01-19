@@ -264,7 +264,7 @@
           (println "----")
           (println)
           ; (println (get-meta "Author") "  ")
-          (println "Author: Brian Burns") 
+          (println "Author: Brian Burns  ") 
           (println (get-meta "URL") "  ")
           (println (get-meta "Version") "  ")
           (println)
