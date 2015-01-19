@@ -215,16 +215,16 @@
   ;            (setq title-lines (cons (strip-comments (car lines)) title-lines)
   ;                  lines (cdr lines))))
   ; (setq title (mapconcat 'identity (reverse title-lines) " "))
-  
+
   (if (string-match "^;;;" (car lines))
       (setq title (strip-comments (car lines))))
-    
+
   (unless (string= title "")
     (setq title-parts (split-string title " --- ")
            title-name (car title-parts)
            title-description (cadr title-parts))
       (princ "\n")
-      
+
       ; (princ "## ")
       ; (princ title-name)
       ; (princ "\n")
@@ -232,7 +232,7 @@
       ; (princ (make-string (length title-name) ?=))
       (princ "[![Build Status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon)\n")
       (princ "----\n")
-      
+
       (princ "\n")
       ; (when (cdr title-parts)
         ; (princ (format "*%s*\n\n" (cadr title-parts))))
@@ -279,7 +279,7 @@
         (print-formatted-line line)))
 
       (setq lines (cdr lines))))
-  
+
   )
 
 
