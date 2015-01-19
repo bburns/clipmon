@@ -96,10 +96,12 @@ pkg:
 # 	cat ${PKG}
 
 
-# generate a readme file from the commentary in the source file
+# generate a readme file from the commentary in the source file.
+# emacs currently generating dos line endings - fix that.
 readme:
 	rm -f README.md
 	${EMACS} --script make-readme.el <${SOURCE} >README.md
+	dos2unix README.md
 	attrib +r README.md
 	head -5 README.md
 	tail -9 README.md
