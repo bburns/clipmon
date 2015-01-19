@@ -85,7 +85,7 @@ lot of notes...
 
 ----
 
-Author: Brian Burns <bburns.km@gmail.com>  
+Author: Brian Burns
 URL: https://github.com/bburns/clipmon  
 Version: 20150114  
 
