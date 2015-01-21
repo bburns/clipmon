@@ -5,7 +5,7 @@
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
 ;; Keywords: convenience
-;; Version: 20150114
+;; Version: 20150120
 ;;
 ;; This package is NOT part of GNU Emacs.
 ;;
@@ -59,7 +59,7 @@
 ;;
 ;; Add something like this to your .emacs file to turn clipmon on and off:
 ;;
-;;     (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
+;;     (global-set-key (kbd "<M-f2>") 'clipmon-mode)
 ;;
 ;; Then try it out - turn it on, go to another application and copy some text to
 ;; the clipboard - clipmon should detect it after a second or two and make a
@@ -105,6 +105,15 @@
 ;; lot of notes...
 ;;
 ;;
+;;;; Feedback
+;; ----------------------------------------------------------------------------
+;;
+;; If you come across any issues you can use Github's system for feature
+;; requests, bug reports, and pull requests:
+;;
+;;     https://github.com/bburns/clipmon/issues
+;;
+;;
 ;;; Code:
 ;;
 ;;;; Public settings
@@ -113,9 +122,7 @@
 (defgroup clipmon nil
   "Clipboard monitor - automatically pastes clipboard changes."
   :group 'convenience
-  :group 'killing
-  :package-version '(clipmon . "20150114"))
-
+  :group 'killing)
 
 (defcustom clipmon-cursor-color "red"
   "Color to set cursor when clipmon is on. Set to nil for no change."
@@ -190,16 +197,15 @@ E.g. to make the text lowercase before pasting,
 ; add item to Options menu
 (define-key-after global-map [menu-bar options clipmon] ; path to new item
   '(menu-item "Clipboard monitor (paste changes)"
-              clipmon-toggle ; function to call on click
-              :help "Automatically paste changes from the system clipboard." ; tooltip
-              :button (:toggle . clipmon--on)) ; show checkmark on/off
+              clipmon-mode ; function to call on click
+              :help "Automatically paste changes from the system clipboard."
+              :button (:toggle . clipmon-mode)) ; show checkmark on/off
   'blink-cursor-mode) ; add after this item
 
 
 ;;;; Private variables
 ;; ----------------------------------------------------------------------------
 
-(defvar clipmon--on nil "Clipmon status: t if monitoring clipboard.")
 (defvar clipmon--timer nil "Timer handle for clipboard monitor.")
 (defvar clipmon--timeout-start nil "Time that timeout timer was started.")
 (defvar clipmon--previous-contents nil "Last contents of the clipboard.")
@@ -219,16 +225,19 @@ E.g. to make the text lowercase before pasting,
 ;; ----------------------------------------------------------------------------
 
 ;;;###autoload
-(defun clipmon-toggle ()
-  "Turn clipmon (clipboard monitor) on and off."
-  (interactive)
-  (if clipmon--on (clipmon-stop) (clipmon-start)))
+(define-minor-mode clipmon-mode
+  "Turn clipboard monitor on/off - automatically pastes clipboard changes."
+  :global t
+  :lighter ""
+  ; clipmon-mode is toggled here implicitly
+  (if clipmon-mode (clipmon-start) (clipmon-stop)))
 
 
 (defun clipmon-start ()
   "Start the clipboard timer, change cursor color, and play a sound."
   (interactive)
-  (if clipmon--on
+  (setq clipmon-mode t) ; in case called outside of clipmon-mode fn
+  (if clipmon--timer
       (message "Clipboard monitor already running.")
     ; initialize
     (setq clipmon--previous-contents (clipmon--clipboard-contents))
@@ -242,15 +251,17 @@ E.g. to make the text lowercase before pasting,
     (message
      "Clipboard monitor started with timer interval %d seconds. Stop with %s."
      clipmon-interval
-     (substitute-command-keys "\\[clipmon-toggle]")) ; eg "<M-f2>"
+     (substitute-command-keys "\\[clipmon-mode]")) ; eg "<M-f2>"
     (clipmon--play-sound)
-    (setq clipmon--on t)))
+    (setq clipmon-mode t) ; in case called outside of clipmon-mode fn
+    ))
 
 
 (defun clipmon-stop ()
   "Stop the clipboard timer, restore cursor, and play a sound."
   (interactive)
-  (if (null clipmon--on)
+  (setq clipmon-mode nil) ; in case called outside of clipmon-mode fn
+  (if (null clipmon--timer)
       (message "Clipboard monitor already stopped.")
     (cancel-timer clipmon--timer)
     (setq clipmon--timer nil)
@@ -258,7 +269,7 @@ E.g. to make the text lowercase before pasting,
         (set-face-background 'cursor clipmon--cursor-color-original))
     (message "Clipboard monitor stopped.")
     (clipmon--play-sound)
-    (setq clipmon--on nil)))
+    ))
 
 
 
@@ -273,8 +284,8 @@ Otherwise stop clipmon if it's been idle a while."
         (clipmon--on-clipboard-change s)
         ; otherwise stop monitor if it's been idle a while
         (if clipmon-timeout
-            (let ((idletime (clipmon--seconds-since clipmon--timeout-start)))
-              (when (> idletime (* 60 clipmon-timeout))
+            (let ((idle-seconds (clipmon--seconds-since clipmon--timeout-start)))
+              (when (> idle-seconds (* 60 clipmon-timeout))
                 (clipmon-stop)
                 (message
                  "Clipboard monitor stopped after %d minutes of inactivity."
@@ -283,7 +294,7 @@ Otherwise stop clipmon if it's been idle a while."
 
 
 (defun clipmon--on-clipboard-change (s)
-  "Clipboard changed - transform text, insert it, play sound, update state."
+  "Clipboard changed - transform text S, insert it, play sound, update state."
   (setq clipmon--previous-contents s) ; save contents
   (setq s (clipmon--transform-text s))
   (insert s)
@@ -292,7 +303,7 @@ Otherwise stop clipmon if it's been idle a while."
 
 
 (defun clipmon--transform-text (s)
-  "Apply transformations to clipboard text."
+  "Apply transformations to clipboard text S."
   (if clipmon-trim-string (setq s (clipmon--trim-left s)))
   (if clipmon-remove-regexp
       (setq s (replace-regexp-in-string clipmon-remove-regexp "" s)))
@@ -320,13 +331,13 @@ Returns a string, or nil.")
 
 
 (defun clipmon--trim-left (s)
-  "Remove leading spaces from string."
+  "Remove leading spaces from string S."
   (replace-regexp-in-string  "^[ \t]+"  ""  s))
 
 
 (defun clipmon--seconds-since (time)
   "Return number of seconds elapsed since the given time.
-Time should be in Emacs time format (see `current-time').
+TIME should be in Emacs time format (see `current-time').
 Valid for up to 2**16 seconds = 65536 secs = 18hrs."
   (cadr (time-subtract (current-time) time)))
 

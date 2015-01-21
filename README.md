@@ -37,7 +37,7 @@ Usage
 
 Add something like this to your .emacs file to turn clipmon on and off:
 
-    (global-set-key (kbd "<M-f2>") 'clipmon-toggle)
+    (global-set-key (kbd "<M-f2>") 'clipmon-mode)
 
 Then try it out - turn it on, go to another application and copy some text to
 the clipboard - clipmon should detect it after a second or two and make a

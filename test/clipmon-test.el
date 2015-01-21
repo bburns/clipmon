@@ -1,5 +1,4 @@
 ;;; clipmon-test.el --- tests for clipmon.el
-
 ;;; Commentary:
 
 ; Run standalone with
@@ -21,7 +20,7 @@
 (require 'clipmon)
 
 
-(ert-deftest try-no-transforms ()
+(ert-deftest test-no-transforms ()
   "Try with no transforms on text."
 
   (let ((clipmon-trim-string nil)
@@ -32,14 +31,12 @@
 
     (should (equal
              (clipmon--transform-text
-              " Marbled murrelets use old-growth forest stands for nesting.[2][3] "
-              )
-             " Marbled murrelets use old-growth forest stands for nesting.[2][3] "
-             ))
+               " Marbled murrelets use old-growth forest stands for nesting.[2][3] ")
+               " Marbled murrelets use old-growth forest stands for nesting.[2][3] "))
     ))
 
 
-(ert-deftest try-all-transforms ()
+(ert-deftest test-all-transforms ()
   "Try all text transforms."
 
   (let ((clipmon-trim-string t)
@@ -50,14 +47,12 @@
 
     (should (equal
              (clipmon--transform-text
-              " Marbled murrelets use old-growth forest stands for nesting.[2][3] "
-              )
-             "<<marbled murrelets use old-growth forest for nesting. >>"
-             ))
+               " Marbled murrelets use old-growth forest stands for nesting.[2][3] ")
+               "<<marbled murrelets use old-growth forest for nesting. >>"))
     ))
 
 
-(ert-deftest try-remove-regexp ()
+(ert-deftest test-remove-regexp ()
   "Try the remove-regexp for Wikipedia references."
 
   (let ((clipmon-trim-string nil)
@@ -68,10 +63,55 @@
 
     (should (equal
              (clipmon--transform-text
-              " Marbled [1 2] murrelets[115] use [old-growth][99] stands [1984] for nesting.[2] "
-              )
-              " Marbled [1 2] murrelets use [old-growth] stands [1984] for nesting. "
-             ))
+               " Marbled [1 2] murrelets[115] use [old-growth][99] stands [1984] for nesting.[2] ")
+               " Marbled [1 2] murrelets use [old-growth] stands [1984] for nesting. "))
     ))
+
+
+(ert-deftest test-mode-on-off ()
+  "Have you tried turning it off and on again?"
+  (let ((clipmon-sound nil))
+    
+    ; off
+    (clipmon-stop)
+    (should (null clipmon-mode))
+    (clipmon-stop)
+    (should (null clipmon-mode))
+    
+    ; on
+    (clipmon-mode 'toggle)
+    (should clipmon-mode)
+    
+    ; off
+    (clipmon-mode 'toggle)
+    (should (null clipmon-mode))
+    
+    ; on
+    (clipmon-start)
+    (should clipmon-mode)
+    (clipmon-start)
+    (should clipmon-mode)
+    
+    ; off
+    (clipmon-mode 0)
+    (should (null clipmon-mode))
+    ))
+
+
+(ert-deftest test-timeout ()
+  "Let clock timeout to turn it off."
+  (let ((clipmon-interval 0.1) ; secs
+        (clipmon-timeout (/ 0.5 60.0)) ; 0.5 secs in mins
+        (sleep-amount 1.0) ; secs
+        (clipmon-sound nil))
+    
+    (clipmon-stop)
+    (clipmon-start)
+    (should clipmon-mode)
+    (sleep-for sleep-amount) ; wait for timeout
+    (should (null clipmon-mode))
+    ))
+
+  
 
 ;;; clipmon-test.el ends here
