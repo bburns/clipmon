@@ -5,8 +5,8 @@
 ; $ emacs -batch -L . -l clipmon-test.el -f ert-run-tests-batch
 ;
 ; Running 2 tests (2014-12-27 01:01:14-0600)
-;    passed  1/2  all-transforms
-;    passed  2/2  no-transforms
+;    passed  1/2  clipmon-test-all-transforms
+;    passed  2/2  clipmon-test-no-transforms
 ; Ran 2 tests, 2 results as expected (2014-12-27 01:01:14-0600)
 ;
 ;
@@ -20,7 +20,7 @@
 (require 'clipmon)
 
 
-(ert-deftest test-no-transforms ()
+(ert-deftest clipmon-test-no-transforms ()
   "Try with no transforms on text."
 
   (let ((clipmon-trim-string nil)
@@ -36,7 +36,7 @@
     ))
 
 
-(ert-deftest test-all-transforms ()
+(ert-deftest clipmon-test-all-transforms ()
   "Try all text transforms."
 
   (let ((clipmon-trim-string t)
@@ -52,7 +52,7 @@
     ))
 
 
-(ert-deftest test-remove-regexp ()
+(ert-deftest clipmon-test-remove-regexp ()
   "Try the remove-regexp for Wikipedia references."
 
   (let ((clipmon-trim-string nil)
@@ -68,7 +68,7 @@
     ))
 
 
-(ert-deftest test-mode-on-off ()
+(ert-deftest clipmon-test-mode-on-off ()
   "Have you tried turning it off and on again?"
   (let ((clipmon-sound nil))
     
@@ -98,7 +98,7 @@
     ))
 
 
-(ert-deftest test-timeout ()
+(ert-deftest clipmon-test-timeout ()
   "Let clock timeout."
   (let ((clipmon-interval 0.1) ; secs
         (clipmon-timeout (/ 0.2 60.0)) ; 0.2 secs in mins

@@ -122,7 +122,7 @@
 ;;
 ;;
 ;;; Code:
-;;
+
 ;;;; Public settings
 ;; ----------------------------------------------------------------------------
 
@@ -345,8 +345,11 @@ Returns a string, or nil.")
   "Return number of seconds elapsed since the given time, including milliseconds.
 TIME should be in Emacs time format (see `current-time').
 Valid for up to 2**16 seconds = 65536 secs ~ 18hrs."
-  (let ((diff (time-subtract (current-time) time)))
-    (+ (cadr diff) (/ (cl-caddr diff) 1.0e6))))
+  (let* ((elapsed (time-subtract (current-time) time))
+         (seconds (nth 1 elapsed))
+         (microseconds (nth 2 elapsed)) ; accurate to milliseconds on my system, anyway
+         (total (+ seconds (/ microseconds 1.0e6))))
+    total))
 
 
 ;;;; Footer
