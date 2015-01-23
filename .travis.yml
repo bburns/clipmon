@@ -1,22 +1,25 @@
 
+# build script for travis continuous integration
+# https://travis-ci.org/bburns/clipmon
 # adapted from https://github.com/magnars/dash.el/blob/master/.travis.yml
 
 language: emacs-lisp
 
+
 before_install:
-  
+
   # PPA for stable Emacs packages, only up to 24.3
   # https://launchpad.net/~cassou/+archive/ubuntu/emacs
   - sudo add-apt-repository -y ppa:cassou/emacs
-  
+
   # PPA for Emacs 24.4
   # https://launchpad.net/~andreas-h/+archive/ubuntu/emacs
   # - sudo add-apt-repository -y ppa:andreas-h/emacs
-  
+
   # PPA for Emacs nightlies, 25.1?
   # https://launchpad.net/~ubuntu-elisp/+archive/ubuntu/ppa
   - sudo add-apt-repository -y ppa:ubuntu-elisp/ppa
-  
+
   # Update and install the Emacs for our environment
   - sudo apt-get update -qq
   - sudo apt-get install -qq -yy ${EMACS}-nox ${EMACS}-el
@@ -27,12 +30,15 @@ env:
   - EMACS=emacs-snapshot
 
 
-email:
-  - bburns.km@gmail.com
+# By default, a build email is sent to the committer and the author,
+# but only if they have access to the repository the commit was pushed to.
+notifications:
+  email:
+    on_success: always
+    on_failure: always
 
 
 script:
   make test
-
 
 
