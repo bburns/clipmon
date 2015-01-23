@@ -100,9 +100,10 @@
 ;;;; Sound File
 ;; ----------------------------------------------------------------------------
 ;;
-;; The sound file was created with Audacity [http://audacity.sourceforge.net/].
-;; It's not too loud so hopefully it doesn't get annoying when you're taking a
-;; lot of notes...
+;; The sound file was created with Audacity [2]. It's a bit on the quiet side so
+;; hopefully it doesn't get annoying when you're taking a lot of notes...
+;;
+;; [2] http://audacity.sourceforge.net/
 ;;
 ;;
 ;;;; Todo
@@ -115,9 +116,9 @@
 ;;;; Feedback
 ;; ----------------------------------------------------------------------------
 ;;
-;; For feature requests, bug reports, or pull requests, see:
+;; For feature requests or bug reports, see the Github issues page [3]. 
 ;;
-;;     https://github.com/bburns/clipmon/issues
+;; [3] https://github.com/bburns/clipmon/issues
 ;;
 ;;
 ;;
