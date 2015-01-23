@@ -15,10 +15,9 @@ on when you need to copy a lot of text from elsewhere, then turn it off when
 you're done.
 
 It also helps to have an autocopy feature or addon for the browser, e.g.
-AutoCopy 2 for Firefox [1] - then you can just select text to copy it to the
-clipboard.
-
-[1] https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/
+AutoCopy 2 for Firefox
+[https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/] - then you can
+just select text to copy it to the clipboard.
 
 
 Installation
@@ -78,10 +77,9 @@ transforms on the clipboard text are performed in this order:
 Sound File
 ----------------------------------------------------------------------------
 
-The sound file was created with Audacity [2]. It's a bit on the quiet side so
-hopefully it doesn't get annoying when you're taking a lot of notes...
-
-[2] http://audacity.sourceforge.net/
+The sound file was created with Audacity [http://audacity.sourceforge.net/].
+It's a bit on the quiet side so hopefully it doesn't get annoying when you're
+taking a lot of notes...
 
 
 Todo
@@ -94,9 +92,9 @@ Todo
 Feedback
 ----------------------------------------------------------------------------
 
-For feature requests or bug reports, see the Github issues page [3]. 
-
-[3] https://github.com/bburns/clipmon/issues
+Feedback is always welcome - for feature requests or bug reports, see the
+Github issues page [https://github.com/bburns/clipmon/issues], or feel free
+to open a pull request.
 
 
 
