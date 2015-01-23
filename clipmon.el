@@ -256,7 +256,7 @@ E.g. to make the text lowercase before pasting,
       (setq clipmon--cursor-color-original (face-background 'cursor))
       (set-face-background 'cursor clipmon-cursor-color))
     (message
-     "Clipboard monitor started with timer interval %d seconds. Stop with %s."
+     "Clipboard monitor started with timer interval %g seconds. Stop with %s."
      clipmon-interval
      (substitute-command-keys "\\[clipmon-mode]")) ; eg "<M-f2>"
     (clipmon--play-sound)
@@ -264,7 +264,7 @@ E.g. to make the text lowercase before pasting,
     ))
 
 
-(defun clipmon-stop ()
+(defun clipmon-stop (&optional msg)
   "Stop the clipboard timer, restore cursor, and play a sound."
   (interactive)
   (setq clipmon-mode nil) ; in case called outside of clipmon-mode fn
@@ -274,7 +274,7 @@ E.g. to make the text lowercase before pasting,
     (setq clipmon--timer nil)
     (if clipmon--cursor-color-original
         (set-face-background 'cursor clipmon--cursor-color-original))
-    (message "Clipboard monitor stopped.")
+    (message (or msg "Clipboard monitor stopped."))
     (clipmon--play-sound)
     ))
 
@@ -292,11 +292,10 @@ Otherwise stop clipmon if it's been idle a while."
         ; otherwise stop monitor if it's been idle a while
         (if clipmon-timeout
             (let ((idle-seconds (clipmon--seconds-since clipmon--timeout-start)))
-              (when (> idle-seconds (* 60 clipmon-timeout))
-                (clipmon-stop)
-                (message
-                 "Clipboard monitor stopped after %d minutes of inactivity."
-                 clipmon-timeout)
+              (when (>= idle-seconds (* 60 clipmon-timeout))
+                (clipmon-stop (format
+                   "Clipboard monitor stopped after %g minutes of inactivity."
+                   clipmon-timeout))
                 ))))))
 
 
@@ -343,10 +342,11 @@ Returns a string, or nil.")
 
 
 (defun clipmon--seconds-since (time)
-  "Return number of seconds elapsed since the given time.
+  "Return number of seconds elapsed since the given time, including milliseconds.
 TIME should be in Emacs time format (see `current-time').
-Valid for up to 2**16 seconds = 65536 secs = 18hrs."
-  (cadr (time-subtract (current-time) time)))
+Valid for up to 2**16 seconds = 65536 secs ~ 18hrs."
+  (let ((diff (time-subtract (current-time) time)))
+    (+ (cadr diff) (/ (cl-caddr diff) 1.0e6))))
 
 
 ;;;; Footer

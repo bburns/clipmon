@@ -99,10 +99,10 @@
 
 
 (ert-deftest test-timeout ()
-  "Let clock timeout to turn it off."
+  "Let clock timeout."
   (let ((clipmon-interval 0.1) ; secs
-        (clipmon-timeout (/ 0.5 60.0)) ; 0.5 secs in mins
-        (sleep-amount 1.0) ; secs
+        (clipmon-timeout (/ 0.2 60.0)) ; 0.2 secs in mins
+        (sleep-amount 0.4) ; secs
         (clipmon-sound nil))
     
     (clipmon-stop)
