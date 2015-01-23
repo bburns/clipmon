@@ -331,9 +331,12 @@ Otherwise stop clipmon if it's been idle a while."
 ;;;; Library functions
 ;; ----------------------------------------------------------------------------
 
-(defalias 'clipmon--clipboard-contents 'x-get-selection-value
+(defun clipmon--clipboard-contents ()
   "Get contents of system clipboard (as opposed to Emacs's kill ring).
-Returns a string, or nil.")
+Returns a string, or nil."
+  ; when the OS is first started x-get-selection-value will throw (error "No
+  ; selection is available")
+  (ignore-errors (x-get-selection-value)))
 
 
 (defun clipmon--trim-left (s)
