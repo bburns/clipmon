@@ -35,7 +35,7 @@ time you start Emacs.
 Usage
 ----------------------------------------------------------------------------
 
-Add something like this to your .emacs file to turn clipmon on and off:
+Add something like this to your .emacs file to turn clipmon on and off easily:
 
     (global-set-key (kbd "<M-f2>") 'clipmon-mode)
 
@@ -83,11 +83,27 @@ It's not too loud so hopefully it doesn't get annoying when you're taking a
 lot of notes...
 
 
+Todo
+----------------------------------------------------------------------------
+
+- Prefix with C-u to set a target point, then allow pasting from within Emacs.
+- Put sound, messages on start, detect, stop hooks instead of hardcoded.
+
+
+Feedback
+----------------------------------------------------------------------------
+
+For feature requests, bug reports, or pull requests, see:
+
+    https://github.com/bburns/clipmon/issues
+
+
+
 ----
 
 Author: Brian Burns  
 URL: https://github.com/bburns/clipmon  
-Version: 20150114  
+Version: 20150120  
 
 This file was generated from commentary in clipmon.el.
 
