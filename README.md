@@ -1,6 +1,6 @@
 
-## clipmon.el [![Build Status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon)
-----
+clipmon.el [![Build Status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon) [![MELPA](http://melpa.org/packages/clipmon-badge.svg)](http://melpa.org/#/clipmon)
+----------------------------------------------------------------------------
 
 
 Description
