@@ -1,4 +1,4 @@
-;;; clipmon.el --- Clipboard monitor - automatically paste clipboard changes
+;;; clipmon.el --- Clipboard monitor - automatically grab clipboard changes
 ;;
 ;; Copyright (c) 2015 Brian Burns
 ;;
@@ -28,8 +28,10 @@
 ;;;; Description
 ;; ----------------------------------------------------------------------------
 ;;
-;; Clipmon is a clipboard monitor - it watches the system clipboard and pastes
-;; any changes into the current location in Emacs.
+;; Clipmon is a clipboard monitor - it watches the system clipboard and inserts
+;; any changes into the current location in Emacs. It can alternately add the
+;; text to the kill-ring, which can then be browsed with a package like
+;; browse-kill-ring or helm-kill-ring.
 ;;
 ;; You can use it for taking notes from a webpage, for example - just copy the
 ;; text you want to save and it will be pasted into Emacs. Typically you turn it
@@ -37,9 +39,8 @@
 ;; you're done.
 ;;
 ;; It also helps to have an autocopy feature or addon for the browser, e.g.
-;; AutoCopy 2 for Firefox
-;; [https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/] - then you can
-;; just select text to copy it to the clipboard.
+;; AutoCopy 2 for Firefox - then you can just select text to copy it to the
+;; clipboard.
 ;;
 ;;
 ;;;; Installation
@@ -85,6 +86,7 @@
 ;;     (setq clipmon-sound t)             ; t for included beep, or path or nil
 ;;     (setq clipmon-interval 2)          ; time interval to check clipboard (secs)
 ;;     (setq clipmon-timeout 5)           ; stop if no activity after n minutes
+;;     (setq clipmon-action 'insert)      ; action(s) to take with transformed text
 ;;
 ;; transforms on the clipboard text are performed in this order:
 ;;
@@ -94,6 +96,10 @@
 ;;     (setq clipmon-prefix "")              ; add to start of text
 ;;     (setq clipmon-suffix "\n\n")          ; add to end of text
 ;;     (setq clipmon-transform-function nil) ; additional transform function
+;;
+;; To add text to the kill ring instead of inserting it in place:
+;;
+;;     (setq clipmon-action 'kill-new)
 ;;
 ;;
 ;;;; Sound File
@@ -115,8 +121,8 @@
 ;; ----------------------------------------------------------------------------
 ;;
 ;; Feedback is always welcome - for feature requests or bug reports, see the
-;; Github issues page [https://github.com/bburns/clipmon/issues], or feel free
-;; to open a pull request.
+;; Github issues page [https://github.com/bburns/clipmon/issues] - pull requests
+;; are even better!
 ;;
 ;;
 ;;
@@ -157,6 +163,24 @@ audio file - Emacs can play .wav or .au files."
 Set to nil for no timeout."
   :group 'clipmon
   :type 'integer)
+
+
+(defcustom clipmon-action 'insert
+  "Action(s) to take with text after transformations have been made.
+This is a function or list of functions that takes a string (the
+transformed text), and does something with it (by default,
+inserts it at the current location). This could be used to
+implement any kind of action with the text. Currently the return
+value is ignored.
+Can be:
+  - insert - insert text at the current location (default),
+  - kill-new - add text to the kill-ring,
+  - any function that takes a single string argument, or
+  - a list of such functions."
+  :group 'clipmon
+  :type 'hook
+  :options '(insert kill-new)
+  :risky t)
 
 
 ;; transforms on text - these are performed in this order
@@ -288,21 +312,21 @@ Otherwise stop clipmon if it's been idle a while."
   (let ((s (clipmon--clipboard-contents))) ; s may actually be nil here
     (if (and s (not (string-equal s clipmon--previous-contents))) ; if changed
         (clipmon--on-clipboard-change s)
-        ; otherwise stop monitor if it's been idle a while
-        (if clipmon-timeout
-            (let ((idle-seconds (clipmon--seconds-since clipmon--timeout-start)))
-              (when (>= idle-seconds (* 60 clipmon-timeout))
-                (clipmon-stop (format
-                   "Clipboard monitor stopped after %g minutes of inactivity."
-                   clipmon-timeout))
-                ))))))
+      ;; otherwise stop monitor if it's been idle a while
+      (if clipmon-timeout
+          (let ((idle-seconds (clipmon--seconds-since clipmon--timeout-start)))
+            (when (>= idle-seconds (* 60 clipmon-timeout))
+              (clipmon-stop (format
+                  "Clipboard monitor stopped after %g minutes of inactivity."
+                  clipmon-timeout))
+              ))))))
 
 
 (defun clipmon--on-clipboard-change (s)
   "Clipboard changed - transform text S, insert it, play sound, update state."
   (setq clipmon--previous-contents s) ; save contents
   (setq s (clipmon--transform-text s))
-  (insert s)
+  (run-hook-with-args 'clipmon-action s) ; (insert s) by default
   (clipmon--play-sound)
   (setq clipmon--timeout-start (current-time))) ; restart timeout timer
 
@@ -355,6 +379,7 @@ Valid for up to 2**16 seconds = 65536 secs ~ 18hrs."
 
 
 ;;;; Footer
+;; ----------------------------------------------------------------------------
 
 (provide 'clipmon)
 

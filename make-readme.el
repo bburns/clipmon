@@ -231,9 +231,9 @@
       ; (princ (concat "## " title-name " "))
       (princ title-name)
       (princ " ")
-      (princ "[![Build Status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon)")
+      (princ "[![Travis build status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon)")
       (princ " ")
-      (princ "[![MELPA](http://melpa.org/packages/clipmon-badge.svg)](http://melpa.org/#/clipmon)")
+      (princ "[![melpa.org](http://melpa.org/packages/clipmon-badge.svg)](http://melpa.org/#/clipmon)")
       (princ "\n")
       (princ (make-string 76 ?-))
 

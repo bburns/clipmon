@@ -1,13 +1,14 @@
 
-clipmon.el [![Build Status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon) [![MELPA](http://melpa.org/packages/clipmon-badge.svg)](http://melpa.org/#/clipmon)
+clipmon.el [![Travis build status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon) [![melpa.org](http://melpa.org/packages/clipmon-badge.svg)](http://melpa.org/#/clipmon)
 ----------------------------------------------------------------------------
 
 
 Description
 ----------------------------------------------------------------------------
 
-Clipmon is a clipboard monitor - it watches the system clipboard and pastes
-any changes into the current location in Emacs.
+Clipmon is a clipboard monitor - it watches the system clipboard and inserts
+any changes into the current location in Emacs. It can also add them to the
+kill-ring, which can then be browsed with a package like browse-kill-ring.
 
 You can use it for taking notes from a webpage, for example - just copy the
 text you want to save and it will be pasted into Emacs. Typically you turn it
@@ -63,6 +64,7 @@ or set them in your .emacs file - these are the default values:
     (setq clipmon-sound t)             ; t for included beep, or path or nil
     (setq clipmon-interval 2)          ; time interval to check clipboard (secs)
     (setq clipmon-timeout 5)           ; stop if no activity after n minutes
+    (setq clipmon-action 'insert)      ; action to take with clipboard text
 
 transforms on the clipboard text are performed in this order:
 
@@ -72,6 +74,17 @@ transforms on the clipboard text are performed in this order:
     (setq clipmon-prefix "")              ; add to start of text
     (setq clipmon-suffix "\n\n")          ; add to end of text
     (setq clipmon-transform-function nil) ; additional transform function
+
+
+Hooks
+
+As with all minor modes, hooks for calling the mode function and turning the
+mode on and off are available (the on and off hooks are not bound by
+default though):
+
+    clipmon-mode-hook
+    clipmon-on-hook
+    clipmon-off-hook
 
 
 Sound File
