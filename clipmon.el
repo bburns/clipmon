@@ -29,7 +29,7 @@
 ;; ----------------------------------------------------------------------------
 ;;
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and inserts
-;; any changes into the current location in Emacs. It can alternately add the
+;; any changes into the current location in Emacs. It can also add the
 ;; text to the kill-ring, which can then be browsed with a package like
 ;; browse-kill-ring or helm-kill-ring.
 ;;
@@ -88,7 +88,8 @@
 ;;     (setq clipmon-timeout 5)           ; stop if no activity after n minutes
 ;;     (setq clipmon-action 'insert)      ; action(s) to take with transformed text
 ;;
-;; transforms on the clipboard text are performed in this order:
+;;
+;; Transforms on the clipboard text are performed in this order:
 ;;
 ;;     (setq clipmon-trim-string t)          ; remove leading whitespace
 ;;     (setq clipmon-remove-regexp           ; remove text matching this regexp
@@ -97,9 +98,22 @@
 ;;     (setq clipmon-suffix "\n\n")          ; add to end of text
 ;;     (setq clipmon-transform-function nil) ; additional transform function
 ;;
+;;
 ;; To add text to the kill ring instead of inserting it in place:
 ;;
 ;;     (setq clipmon-action 'kill-new)
+;;
+;; or do both:
+;;
+;;     (setq clipmon-action '(insert kill-new))
+;;
+;;
+;; And as with all minor modes, hooks are available for calling clipmon-mode and
+;; turning the mode on and off (the on and off hooks are not bound by default):
+;;
+;;     clipmon-mode-hook
+;;     clipmon-on-hook
+;;     clipmon-off-hook
 ;;
 ;;
 ;;;; Sound File
@@ -122,7 +136,7 @@
 ;;
 ;; Feedback is always welcome - for feature requests or bug reports, see the
 ;; Github issues page [https://github.com/bburns/clipmon/issues] - pull requests
-;; are even better!
+;; are even better. :) 
 ;;
 ;;
 ;;

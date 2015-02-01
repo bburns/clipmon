@@ -7,8 +7,9 @@ Description
 ----------------------------------------------------------------------------
 
 Clipmon is a clipboard monitor - it watches the system clipboard and inserts
-any changes into the current location in Emacs. It can also add them to the
-kill-ring, which can then be browsed with a package like browse-kill-ring.
+any changes into the current location in Emacs. It can also add the
+text to the kill-ring, which can then be browsed with a package like
+browse-kill-ring or helm-kill-ring.
 
 You can use it for taking notes from a webpage, for example - just copy the
 text you want to save and it will be pasted into Emacs. Typically you turn it
@@ -16,9 +17,8 @@ on when you need to copy a lot of text from elsewhere, then turn it off when
 you're done.
 
 It also helps to have an autocopy feature or addon for the browser, e.g.
-AutoCopy 2 for Firefox
-[https://addons.mozilla.org/en-US/firefox/addon/autocopy-2/] - then you can
-just select text to copy it to the clipboard.
+AutoCopy 2 for Firefox - then you can just select text to copy it to the
+clipboard.
 
 
 Installation
@@ -64,9 +64,10 @@ or set them in your .emacs file - these are the default values:
     (setq clipmon-sound t)             ; t for included beep, or path or nil
     (setq clipmon-interval 2)          ; time interval to check clipboard (secs)
     (setq clipmon-timeout 5)           ; stop if no activity after n minutes
-    (setq clipmon-action 'insert)      ; action to take with clipboard text
+    (setq clipmon-action 'insert)      ; action(s) to take with transformed text
 
-transforms on the clipboard text are performed in this order:
+
+Transforms on the clipboard text are performed in this order:
 
     (setq clipmon-trim-string t)          ; remove leading whitespace
     (setq clipmon-remove-regexp           ; remove text matching this regexp
@@ -76,11 +77,17 @@ transforms on the clipboard text are performed in this order:
     (setq clipmon-transform-function nil) ; additional transform function
 
 
-Hooks
+To add text to the kill ring instead of inserting it in place:
 
-As with all minor modes, hooks for calling the mode function and turning the
-mode on and off are available (the on and off hooks are not bound by
-default though):
+    (setq clipmon-action 'kill-new)
+
+or do both:
+
+    (setq clipmon-action '(insert kill-new))
+
+
+And as with all minor modes, hooks are available for calling clipmon-mode and
+turning the mode on and off (the on and off hooks are not bound by default):
 
     clipmon-mode-hook
     clipmon-on-hook
@@ -106,8 +113,8 @@ Feedback
 ----------------------------------------------------------------------------
 
 Feedback is always welcome - for feature requests or bug reports, see the
-Github issues page [https://github.com/bburns/clipmon/issues], or feel free
-to open a pull request.
+Github issues page [https://github.com/bburns/clipmon/issues] - pull requests
+are even better. :) 
 
 
 
@@ -115,9 +122,9 @@ to open a pull request.
 
 Author: Brian Burns  
 URL: https://github.com/bburns/clipmon  
-Version: 20150120  
+Version: 20150131  
 
-This file was generated from commentary in clipmon.el.
+This file was generated from commentary in clipmon.el - do not edit it!
 
 ----
 

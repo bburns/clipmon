@@ -1,6 +1,8 @@
 ;;; clipmon-test.el --- tests for clipmon.el
 ;;; Commentary:
 
+; Just test the complicated things. 
+
 ; Run standalone with
 ; $ emacs -batch -L . -l clipmon-test.el -f ert-run-tests-batch
 ;

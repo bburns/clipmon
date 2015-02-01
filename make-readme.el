@@ -273,7 +273,7 @@
           (println (get-meta "URL") "  ")
           (println (get-meta "Version") "  ")
           (println)
-          (println "This file was generated from commentary in " title-name ".")
+          (println "This file was generated from commentary in " title-name " - do not edit it!")
           (println)
           (println "----")
           (println)
