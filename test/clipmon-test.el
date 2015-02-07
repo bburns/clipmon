@@ -25,14 +25,14 @@
 (ert-deftest clipmon-test-no-transforms ()
   "Try with no transforms on text."
 
-  (let ((clipmon-trim-string nil)
-        (clipmon-remove-regexp nil)
-        (clipmon-prefix nil)
-        (clipmon-suffix nil)
+  (let ((clipmon-transform-trim nil)
+        (clipmon-transform-remove nil)
+        (clipmon-transform-prefix nil)
+        (clipmon-transform-suffix nil)
         (clipmon-transform-function nil))
 
     (should (equal
-             (clipmon--transform-text
+             (clipmon--autoinsert-transform-text
                " Marbled murrelets use old-growth forest stands for nesting.[2][3] ")
                " Marbled murrelets use old-growth forest stands for nesting.[2][3] "))
     ))
@@ -41,14 +41,14 @@
 (ert-deftest clipmon-test-all-transforms ()
   "Try all text transforms."
 
-  (let ((clipmon-trim-string t)
-        (clipmon-remove-regexp "stands \\|\\[[0-9]+\\]\\|\\[citation needed\\]")
-        (clipmon-prefix "<<")
-        (clipmon-suffix ">>")
+  (let ((clipmon-transform-trim t)
+        (clipmon-transform-remove "stands \\|\\[[0-9]+\\]\\|\\[citation needed\\]")
+        (clipmon-transform-prefix "<<")
+        (clipmon-transform-suffix ">>")
         (clipmon-transform-function (lambda (s) (downcase s))))
 
     (should (equal
-             (clipmon--transform-text
+             (clipmon--autoinsert-transform-text
                " Marbled murrelets use old-growth forest stands for nesting.[2][3] ")
                "<<marbled murrelets use old-growth forest for nesting. >>"))
     ))
@@ -57,29 +57,30 @@
 (ert-deftest clipmon-test-remove-regexp ()
   "Try the remove-regexp for Wikipedia references."
 
-  (let ((clipmon-trim-string nil)
+  (let ((clipmon-transform-trim nil)
         ; use the default remove-regexp
-        (clipmon-prefix nil)
-        (clipmon-suffix nil)
+        (clipmon-transform-prefix nil)
+        (clipmon-transform-suffix nil)
         (clipmon-transform-function nil))
 
     (should (equal
-             (clipmon--transform-text
+             (clipmon--autoinsert-transform-text
                " Marbled [1 2] murrelets[115] use [old-growth][99] stands [1984] for nesting.[2] ")
                " Marbled [1 2] murrelets use [old-growth] stands [1984] for nesting. "))
     ))
 
 
-(ert-deftest clipmon-test-mode-on-off ()
-  "Have you tried turning it off and on again?"
-  (let ((clipmon-sound nil))
+(ert-deftest clipmon-test-on-and-off ()
+  "Try turning mode and autoinsert on and off."
+  (let ((clipmon-autoinsert-sound nil))
     
     ; off
-    (clipmon-stop)
+    ; throws an error if it's already stopped
+    (ignore-errors (clipmon-stop))
     (should (null clipmon-mode))
-    (clipmon-stop)
+    (ignore-errors (clipmon-stop))
     (should (null clipmon-mode))
-    
+
     ; on
     (clipmon-mode 'toggle)
     (should clipmon-mode)
@@ -91,27 +92,50 @@
     ; on
     (clipmon-start)
     (should clipmon-mode)
-    (clipmon-start)
+    (ignore-errors (clipmon-start))
     (should clipmon-mode)
     
     ; off
     (clipmon-mode 0)
     (should (null clipmon-mode))
+
+    
+    ; autoinsert
+
+    (ignore-errors (clipmon-autoinsert-stop))
+    (should (null clipmon--autoinsert))
+    (should (null clipmon-mode))
+
+    ; on
+    (clipmon-autoinsert-toggle)
+    (should clipmon--autoinsert)
+    (should clipmon-mode) ; should automatically turn the mode on
+
+    ; off
+    (clipmon-autoinsert-toggle)
+    (should (null clipmon--autoinsert))
+    (should clipmon-mode) ; should stay on
+    
+    (clipmon-mode 0)
+    (should (null clipmon-mode))
+    
     ))
 
 
 (ert-deftest clipmon-test-timeout ()
   "Let clock timeout."
-  (let ((clipmon-interval 0.1) ; secs
-        (clipmon-timeout (/ 0.2 60.0)) ; 0.2 secs in mins
+  (let ((clipmon-timer-interval 0.1) ; secs
+        (clipmon-autoinsert-timeout (/ 0.2 60.0)) ; 0.2 secs in mins
         (sleep-amount 0.4) ; secs
-        (clipmon-sound nil))
+        (clipmon-autoinsert-sound nil))
     
-    (clipmon-stop)
-    (clipmon-start)
-    (should clipmon-mode)
+    (if clipmon--autoinsert (clipmon-autoinsert-stop))
+    (clipmon-autoinsert-start)
+    (should clipmon--autoinsert)
+    (should clipmon-mode) ; should turn this on also
     (sleep-for sleep-amount) ; wait for timeout
-    (should (null clipmon-mode))
+    (should (null clipmon--autoinsert))
+    (should clipmon-mode) ; should still be on
     ))
 
   
