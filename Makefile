@@ -11,7 +11,7 @@ CONTENTS := clipmon.wav
 # ------------------------------------------------------------------------------
 
 EMACS = emacs
-CASK = cask
+MAKE-README = script/make-readme.el
 
 SOURCE = ${PACKAGE}.el
 TEST = test/${PACKAGE}-test.el
@@ -88,7 +88,7 @@ pkg:
 	@echo "  :keywords '(${KEYWORDS}))" >> ${PKG}
 	cat ${PKG}
 
-# cask is asynchronous
+# cask is asynchronous though
 # pkg0:
 # 	@echo "Running cask - hit Enter when done..."
 # 	${CASK} pkg-file
@@ -100,7 +100,7 @@ pkg:
 # emacs currently generating dos line endings - fix that.
 readme:
 	rm -f README.md
-	${EMACS} --script make-readme.el <${SOURCE} >README.md
+	${EMACS} --script ${MAKE-README} <${SOURCE} >README.md
 	dos2unix README.md
 	attrib +r README.md
 	head -5 README.md
