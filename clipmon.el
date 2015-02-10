@@ -1,4 +1,4 @@
-;;; clipmon.el --- Clipboard monitor - save clipboard to kill ring and autoinsert
+;;; clipmon.el --- Clipboard monitor - mirror system clipboard to kill ring and autoinsert
 ;;
 ;; Copyright (c) 2015 Brian Burns
 ;;
