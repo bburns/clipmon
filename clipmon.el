@@ -494,6 +494,7 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
   (when clipmon--autoinsert
     (setq s (clipmon--autoinsert-transform-text s))
     (insert s)
+    (undo-boundary)
     (clipmon--play-sound)
     (setq clipmon--autoinsert-timeout-start (current-time)))) ; reset timeout
 
