@@ -390,7 +390,7 @@ Call `clipmon-autoinsert-toggle' to turn autoinsert on/off."
   (interactive)
   (setq clipmon-mode t) ; in case called outside of clipmon-mode fn
   (if clipmon--timer
-      (error "Clipboard monitor already running.")
+      (message "Clipboard monitor already running.")
     (setq clipmon--previous-contents (clipmon--clipboard-contents))
     (setq clipmon--timer
           (run-at-time nil clipmon-timer-interval 'clipmon--check-clipboard))
@@ -403,7 +403,7 @@ Call `clipmon-autoinsert-toggle' to turn autoinsert on/off."
   (interactive)
   (setq clipmon-mode nil) ; in case called outside of clipmon-mode fn
   (if (null clipmon--timer)
-      (error "Clipboard monitor already stopped.")
+      (message "Clipboard monitor already stopped.")
     (cancel-timer clipmon--timer)
     (setq clipmon--timer nil)
     (if clipmon--autoinsert (clipmon-autoinsert-stop)) ; turn off autoinsert also
@@ -427,7 +427,7 @@ transformed before insertion according to various settings - see
   (interactive)
   (if (null clipmon--timer) (clipmon-start)) ; make sure clipmon is on
   (if clipmon--autoinsert
-      (error "Clipboard monitor autoinsert already on.")
+      (message "Clipboard monitor autoinsert already on.")
     (setq clipmon--autoinsert-timeout-start (current-time))
     (when clipmon-autoinsert-color
       (setq clipmon--cursor-color-original (face-background 'cursor))
@@ -445,7 +445,7 @@ transformed before insertion according to various settings - see
   "Turn off autoinsert - restore cursor color and play sound."
   (interactive)
   (if (null clipmon--autoinsert)
-      (error "Clipboard monitor autoinsert already off.")
+      (message "Clipboard monitor autoinsert already off.")
     (if clipmon--cursor-color-original
         (set-face-background 'cursor clipmon--cursor-color-original))
     (message (or msg "Clipboard monitor autoinsert stopped."))

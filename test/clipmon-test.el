@@ -1,7 +1,7 @@
 ;;; clipmon-test.el --- tests for clipmon.el
 ;;; Commentary:
 
-; Just test the complicated things. 
+; Just test the complicated things.
 
 ; Run standalone with
 ; $ emacs -batch -L . -l clipmon-test.el -f ert-run-tests-batch
@@ -73,38 +73,38 @@
 (ert-deftest clipmon-test-on-and-off ()
   "Try turning mode and autoinsert on and off."
   (let ((clipmon-autoinsert-sound nil))
-    
+
+    ; clipmon-mode
     ; off
-    ; throws an error if it's already stopped
-    (ignore-errors (clipmon-stop))
+    (clipmon-stop)
     (should (null clipmon-mode))
-    (ignore-errors (clipmon-stop))
+    (clipmon-stop)
+    (should (null clipmon-mode))
+
+    ; on
+    (clipmon-start)
+    (should clipmon-mode)
+    (clipmon-start)
+    (should clipmon-mode)
+
+    ; off
+    (clipmon-mode 'toggle)
     (should (null clipmon-mode))
 
     ; on
     (clipmon-mode 'toggle)
     (should clipmon-mode)
-    
-    ; off
-    (clipmon-mode 'toggle)
-    (should (null clipmon-mode))
-    
-    ; on
-    (clipmon-start)
-    (should clipmon-mode)
-    (ignore-errors (clipmon-start))
-    (should clipmon-mode)
-    
+
     ; off
     (clipmon-mode 0)
     (should (null clipmon-mode))
 
-    
-    ; autoinsert
 
-    (ignore-errors (clipmon-autoinsert-stop))
+    ; autoinsert
+    ; off
+    (clipmon-autoinsert-stop)
     (should (null clipmon--autoinsert))
-    (should (null clipmon-mode))
+    (should (null clipmon-mode)) ; ie should still be off
 
     ; on
     (clipmon-autoinsert-toggle)
@@ -115,10 +115,9 @@
     (clipmon-autoinsert-toggle)
     (should (null clipmon--autoinsert))
     (should clipmon-mode) ; should stay on
-    
+
     (clipmon-mode 0)
     (should (null clipmon-mode))
-    
     ))
 
 
@@ -128,8 +127,8 @@
         (clipmon-autoinsert-timeout (/ 0.2 60.0)) ; 0.2 secs in mins
         (sleep-amount 0.4) ; secs
         (clipmon-autoinsert-sound nil))
-    
-    (if clipmon--autoinsert (clipmon-autoinsert-stop))
+
+    (clipmon-autoinsert-stop)
     (clipmon-autoinsert-start)
     (should clipmon--autoinsert)
     (should clipmon-mode) ; should turn this on also
@@ -138,6 +137,6 @@
     (should clipmon-mode) ; should still be on
     ))
 
-  
+
 
 ;;; clipmon-test.el ends here
