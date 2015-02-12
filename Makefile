@@ -63,7 +63,8 @@ info:
 	@echo ""
 
 
-test: compile
+# compile to check for bugs, and build tarfile for install test
+test: compile tar
 	@echo ""
 	@emacs -nw --version
 	@echo ""
