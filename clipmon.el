@@ -1,11 +1,11 @@
-;;; clipmon.el --- Clipboard monitor - mirror system clipboard to kill ring and autoinsert
+;;; clipmon.el --- Clipboard monitor - watch system clipboard, add changes to kill ring/autoinsert
 ;;
 ;; Copyright (c) 2015 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
 ;; Keywords: convenience
-;; Version: 20150206
+;; Version: 20150211
 ;;
 ;; This package is NOT part of GNU Emacs.
 ;;
@@ -77,10 +77,10 @@
 ;; There are also various transformations you can perform on the text, e.g.
 ;; adding newlines to the end.
 ;;
-;; Emacs's kill-ring is like the system clipboard but with multiple items in it.
-;; If you copy a bunch of things in another program, Emacs normally only knows
-;; about the last one copied, but with clipmon mode on, it will monitor the
-;; system clipboard and add any new text it sees to the kill ring.
+;; (Emacs's kill-ring is like the system clipboard but with multiple items in
+;; it. If you copy a bunch of things in another program, Emacs normally only
+;; knows about the last one copied, but with clipmon mode on, it will monitor
+;; the system clipboard and add any new text it sees to the kill ring.)
 ;;
 ;;
 ;;;; Installation
@@ -97,70 +97,75 @@
 ;;;; Usage
 ;; ----------------------------------------------------------------------------
 ;;
-;; Add this to your .emacs file:
-;;
-;;     ;; monitor the system clipboard and add any changes to the kill ring
-;;     (clipmon-mode 1)
-;;
-;;     ;; hit this when you want to insert changes at the current location
-;;     (global-set-key (kbd "<M-f2>") 'clipmon-autoinsert-toggle)
-;;
-;; Try it out - turn on autoinsert with your keybinding (or select the item in
-;; the Options menu), go to another application and copy some text to the
+;; To give it a try, do M-: (clipmon-autoinsert-toggle) - this will turn on
+;; autoinsert. Then go to another application and copy some text to the
 ;; clipboard - clipmon should detect it after a second or two and make a beep.
-;; If you switch back to Emacs, the text should be there in your buffer. You can
-;; turn off autoinsert with the same keybinding.
-;;
-;; If no change is detected after a certain number of minutes, autoinsert will
-;; turn itself off automatically with a beep. This was to prevent the author
-;; from forgetting that autoinsert is on and accidentally adding text to his
-;; buffer.
+;; If you switch back to Emacs, the text should be there in your buffer.
 ;;
 ;; Note that you can still yank and pull text in Emacs as usual while autoinsert
 ;; is on, since it only monitors the system clipboard.
 ;;
-;; Also, if you happen to copy the same text to the clipboard twice,
-;; clipmon won't know about the second time, as it is only able to detect
-;; changes. And if you copy text faster than the timer interval is set it may
-;; miss some changes.
+;; You can turn off autoinsert with the same command - to add a keybinding to it
+;; add something like this to your init file:
+;;
+;;     (global-set-key (kbd "<M-f2>") 'clipmon-autoinsert-toggle)
+;;
+;; You can also turn it on and off from the Options menu.
+;;
+;; Also, if no change is detected after a certain number of minutes, autoinsert will
+;; turn itself off automatically with another beep. This is so you don't forget
+;; that autoinsert is on and accidentally add text to your buffer. 
+;;
+;; And note: if you happen to copy the same text to the clipboard twice, clipmon
+;; won't know about the second time, as it only detects changes. And if you copy
+;; text faster than the timer interval is set it may miss some changes, but you
+;; can adjust the interval.
 ;;
 ;;
 ;;;; Using as a clipboard manager
 ;; ----------------------------------------------------------------------------
 ;;
-;; To try it out, make sure clipmon-mode is on (also accessible from the Options
-;; menu) and autoinsert is off, then copy a few pieces of text from another
-;; program (slower than the default timer interval of 2 seconds though). Switch
-;; back to Emacs, and note that you can yank any of the text back with C-y, M-y,
-;; M-y...
+;; To try out clipmon as a clipboard manager, make sure clipmon-mode is on by
+;; doing M-: (clipmon-mode 1) (also accessible from the Options menu) and that
+;; autoinsert is off, then copy a few pieces of text from another program (more
+;; slowly than the default timer interval of 2 seconds though). Switch back to
+;; Emacs, and see that you can yank any of the text back with C-y, M-y, M-y...
 ;;
-;; You can use the package browse-kill-ring to manage the kill ring - call
+;; Note that when you turn on autoinsert, it also turns on clipmon-mode, to
+;; capture text to the kill ring, but if you'd like to turn on clipmon-mode
+;; automatically, you can add this to your init file:
+;;
+;;     ;; monitor the system clipboard and add any changes to the kill ring
+;;     (add-to-list 'after-init-hook 'clipmon-mode-start)
+;;
+;; You can also use the package browse-kill-ring to manage the kill ring - you
+;; can install it with M-: (package-install 'browse-kill-ring), then call
 ;; `browse-kill-ring' to see the contents of the kill ring, insert from it,
 ;; delete items, etc. Helm also has a package called helm-ring, with the
 ;; function `helm-show-kill-ring'.
 ;;
-;; You can also persist the kill ring between sessions if you'd like (though
-;; note that this might involve writing sensitive information like passwords to
-;; the disk - you could always delete such text from the kill ring though with
-;; `browse-kill-ring-delete').
+;; You can persist the kill ring between sessions if you'd like (though note
+;; that this might involve writing sensitive information like passwords to the
+;; disk - although you could always delete such text from the kill ring with
+;; `browse-kill-ring-delete'). To do so, add this to your init file:
 ;;
-;; To persist the kill ring, add this to your .emacs file:
-;;
-;;     (clipmon-persist)
-;;     (setq savehist-autosave-interval (* 5 60)) ; save every 5 minutes (default)
+;;     ;; persist the kill ring between sessions
+;;     (add-to-list 'after-init-hook 'clipmon-persist)
 ;;
 ;; This will use Emacs's savehist library to save the kill ring, both at the end
-;; of the session and at set intervals. Note though that savehist also saves
-;; various other settings by default, including the minibuffer history - see
-;; `savehist-mode' for more details.
+;; of the session and at set intervals. However, savehist also saves various
+;; other settings by default, including the minibuffer history - see
+;; `savehist-mode' for more details. To change the autosave interval, add
+;; something like this:
 ;;
+;;     (setq savehist-autosave-interval (* 5 60)) ; save every 5 minutes (default)
 ;;
 ;; The kill ring has a fixed number of entries which you can set, depending on
-;; how you use the kill-ring, or how much history you want to save:
+;; how much history you want to save between sessions:
 ;;
 ;;     (setq kill-ring-max 500) ; default is 60 in Emacs 24.4
 ;;
-;; To see how much space the kill-ring is taking up, call this function:
+;; To see how much space the kill-ring is taking up, you can call this function:
 ;;
 ;;     (clipmon-kill-ring-total)
 ;;     => 29670 characters
@@ -173,7 +178,7 @@
 ;;
 ;;     (customize-group 'clipmon)
 ;;
-;; or set them in your .emacs file - these are the default values:
+;; or set them in your init file - these are the default values:
 ;;
 ;;     (setq clipmon-timer-interval 2)       ; check system clipboard every n secs
 ;;     (setq clipmon-autoinsert-sound t)     ; t for included beep, or path or nil
@@ -196,15 +201,14 @@
 ;; - Prefix with C-u to set a target point, then allow cut/copy/pasting from
 ;;   within Emacs, eg to take notes from another buffer, or move text elsewhere.
 ;;
-;;
 ;;;; History
 ;; ----------------------------------------------------------------------------
 ;;
-;; 20150206 refactored to handle kill ring better
+;; 20150211 refactored to handle kill ring better.
 ;;   clipmon-mode now just adds changes to the kill-ring.
 ;;   clipmon-autoinsert-toggle added to toggle automatic inserting of text.
 ;;   changed several setting names - all with aliases to old names.
-;;   clipmon-action removed - no longer need to call kill-new or insert with it.
+;;   clipmon-action removed - no longer needed to call kill-new or insert with it.
 ;; 20150131 added clipmon-action, to accommodate adding to kill-ring
 ;; 20150120 initial release
 ;;
@@ -214,17 +218,17 @@
 ;;
 ;; The sound file was created with Audacity [http://audacity.sourceforge.net/].
 ;; It's a bit on the quiet side so hopefully it doesn't get annoying when you're
-;; taking a lot of notes...
+;; taking a lot of notes.
 ;;
 ;;
-;;;; Feedback
+;;;; Feedback and Thanks
 ;; ----------------------------------------------------------------------------
 ;;
 ;; Feedback is always welcome - for feature requests or bug reports, see the
 ;; Github issues page [https://github.com/bburns/clipmon/issues]. Pull requests
 ;; are welcome also.
 ;;
-;; Thanks to tuhdo for suggesting using clipmon as a clipboard manager, and
+;; Thanks go to tuhdo for suggesting using clipmon as a clipboard manager, and
 ;; Steve Purcell for initial feedback.
 ;;
 ;;
@@ -234,22 +238,23 @@
 ;; ----------------------------------------------------------------------------
 
 ;; just renaming some things here - must come before defcustoms.
+;; could remove after some time though.
 
 (eval-when-compile ; because it's a macro
   (defalias 'clipmon--rename 'define-obsolete-variable-alias))
 
 ;; rename old to new
-(clipmon--rename 'clipmon-interval      'clipmon-timer-interval     "20150206")
-(clipmon--rename 'clipmon-cursor-color  'clipmon-autoinsert-color   "20150206")
-(clipmon--rename 'clipmon-sound         'clipmon-autoinsert-sound   "20150206")
-(clipmon--rename 'clipmon-timeout       'clipmon-autoinsert-timeout "20150206")
-(clipmon--rename 'clipmon-trim          'clipmon-transform-trim     "20150206")
-(clipmon--rename 'clipmon-remove-regexp 'clipmon-transform-remove   "20150206")
-(clipmon--rename 'clipmon-prefix        'clipmon-transform-prefix   "20150206")
-(clipmon--rename 'clipmon-suffix        'clipmon-transform-suffix   "20150206")
+(clipmon--rename 'clipmon-interval      'clipmon-timer-interval     "20150211")
+(clipmon--rename 'clipmon-cursor-color  'clipmon-autoinsert-color   "20150211")
+(clipmon--rename 'clipmon-sound         'clipmon-autoinsert-sound   "20150211")
+(clipmon--rename 'clipmon-timeout       'clipmon-autoinsert-timeout "20150211")
+(clipmon--rename 'clipmon-trim          'clipmon-transform-trim     "20150211")
+(clipmon--rename 'clipmon-remove-regexp 'clipmon-transform-remove   "20150211")
+(clipmon--rename 'clipmon-prefix        'clipmon-transform-prefix   "20150211")
+(clipmon--rename 'clipmon-suffix        'clipmon-transform-suffix   "20150211")
 
-;; FIXME no way to mark as obsolete/removed?
-(clipmon--rename 'clipmon-action        'clipmon-action-obsolete    "20150206")
+;; FIXME how just mark as obsolete/removed?
+(clipmon--rename 'clipmon-action        'clipmon-action-obsolete    "20150211")
 
 
 ;;;; Public settings
@@ -266,7 +271,7 @@
   :type 'integer)
 
 (defcustom clipmon-autoinsert-color "red"
-  "Color to set cursor when clipmon autoinsert is on. Set to nil for no change."
+  "Color to set cursor when clipmon autoinsert is on.  Set to nil for no change."
   :group 'clipmon
   :type 'color)
 
@@ -313,7 +318,7 @@ e.g. Wikipedia-style references with 1-3 digits - [3], [115]."
 (defcustom clipmon-transform-suffix "\n\n"
   "String to add to end of clipboard contents before autoinserting.
 Default is two newlines, which leaves a blank line between clips.
-(To add a newline in the customize interface, type C-q C-j)."
+\(To add a newline in the customize interface, type \\[quoted-insert] C-j)."
   :group 'clipmon
   :type 'string)
 
@@ -338,7 +343,7 @@ E.g. to make the text lowercase before pasting,
 
 ;;;###autoload
 (define-key-after global-map [menu-bar options clipmon-killring] ; path to new item
-  '(menu-item "Clipboard monitor (add to kill ring)"
+  '(menu-item "Clipboard Monitor (Add to Kill Ring)"
               clipmon-mode ; function to call on click
               :help "Add changes to the system clipboard to Emacs's kill ring."
               :button (:toggle . clipmon-mode)) ; show checkmark on/off
@@ -346,9 +351,9 @@ E.g. to make the text lowercase before pasting,
 
 ;;;###autoload
 (define-key-after global-map [menu-bar options clipmon-autoinsert] ; path to new item
-  '(menu-item "Clipboard monitor (autoinsert)"
+  '(menu-item "Clipboard Monitor Autoinsert"
               clipmon-autoinsert-toggle ; function to call on click
-              :help "Automatically insert changes from the system clipboard."
+              :help "Automatically insert changes to the system clipboard at the current location."
               :button (:toggle . clipmon--autoinsert)) ; show checkmark on/off
   'clipmon-killring) ; add after this
 
@@ -356,11 +361,20 @@ E.g. to make the text lowercase before pasting,
 ;;;; Private variables
 ;; ----------------------------------------------------------------------------
 
-(defvar clipmon--timer nil "Timer handle for clipboard monitor.")
-(defvar clipmon--autoinsert nil "t if autoinsert is on.")
-(defvar clipmon--autoinsert-timeout-start nil "Time that timeout timer was started.")
-(defvar clipmon--previous-contents nil "Last contents of the clipboard.")
-(defvar clipmon--cursor-color-original nil "Original cursor color.")
+(defvar clipmon--timer nil
+  "Timer handle for clipboard monitor to watch system clipboard.")
+
+(defvar clipmon--autoinsert nil
+  "Non-nil if autoinsert is on.")
+
+(defvar clipmon--autoinsert-timeout-start nil
+  "Time that autoinsert timeout timer was started.")
+
+(defvar clipmon--previous-contents nil
+  "Last contents of the system clipboard.")
+
+(defvar clipmon--cursor-color-original nil
+  "Original cursor color.")
 
 (defconst clipmon--folder
   (file-name-directory load-file-name)
@@ -377,15 +391,19 @@ E.g. to make the text lowercase before pasting,
 
 ;;;###autoload
 (define-minor-mode clipmon-mode
-  "Turn clipboard monitor on/off - watch system clipboard, add to kill ring.
-Call `clipmon-autoinsert-toggle' to turn autoinsert on/off."
+  "Start/stop clipboard monitor - watch system clipboard, add changes to kill ring.
+To also insert the changes to the system clipboard at the current
+location, call `clipmon-autoinsert-toggle' to turn autoinsert on
+and off. See commentary in source file for more information - M-x
+find-library RET clipmon RET."
   :global t
   :lighter ""
   ; value of clipmon-mode is toggled before this implicitly
-  (if clipmon-mode (clipmon-start) (clipmon-stop)))
+  (if clipmon-mode (clipmon-mode-start) (clipmon-mode-stop)))
 
 
-(defun clipmon-start ()
+;;;###autoload
+(defun clipmon-mode-start ()
   "Start clipboard monitor - watch system clipboard, add changes to kill ring."
   (interactive)
   (setq clipmon-mode t) ; in case called outside of clipmon-mode fn
@@ -398,7 +416,7 @@ Call `clipmon-autoinsert-toggle' to turn autoinsert on/off."
     ))
 
 
-(defun clipmon-stop (&optional msg)
+(defun clipmon-mode-stop ()
   "Stop clipboard monitor and autoinsert modes."
   (interactive)
   (setq clipmon-mode nil) ; in case called outside of clipmon-mode fn
@@ -414,7 +432,7 @@ Call `clipmon-autoinsert-toggle' to turn autoinsert on/off."
 ;;;###autoload
 (defun clipmon-autoinsert-toggle ()
   "Turn autoinsert on/off - watch system clipboard and insert changes.
-Will change cursor color and play a sound. Text will be
+Will change cursor color and play a sound.  Text will be
 transformed before insertion according to various settings - see
 `clipmon--transform-text'."
   (interactive)
@@ -425,7 +443,7 @@ transformed before insertion according to various settings - see
 (defun clipmon-autoinsert-start ()
   "Turn on autoinsert - change cursor color, play sound, insert changes."
   (interactive)
-  (if (null clipmon--timer) (clipmon-start)) ; make sure clipmon is on
+  (if (null clipmon--timer) (clipmon-mode-start)) ; make sure clipmon is on
   (if clipmon--autoinsert
       (message "Clipboard monitor autoinsert already on.")
     (setq clipmon--autoinsert-timeout-start (current-time))
@@ -442,7 +460,8 @@ transformed before insertion according to various settings - see
 
 
 (defun clipmon-autoinsert-stop (&optional msg)
-  "Turn off autoinsert - restore cursor color and play sound."
+  "Turn off autoinsert - restore cursor color and play sound.
+Show optional message MSG, or default message."
   (interactive)
   (if (null clipmon--autoinsert)
       (message "Clipboard monitor autoinsert already off.")
@@ -458,12 +477,12 @@ transformed before insertion according to various settings - see
 (defun clipmon-persist ()
   "Persist the kill ring to disk using Emacs's savehist library.
 Will save the kill ring at the end of the session and at various
-intervals as specified by `savehist-autosave-interval'. Note that
-savehist also includes various other Emacs settings by default,
-including the minibuffer history - see `savehist-mode' for more
-details."
-  ; (require 'savehist)
-  (defvar savehist-additional-variables)
+intervals as specified by variable `savehist-autosave-interval'.
+Note that savehist also includes various other Emacs settings by
+default, including the minibuffer history - see function
+`savehist-mode' for more details."
+  (require 'savehist)
+  (defvar savehist-additional-variables) ; for compiler warning
   (add-to-list 'savehist-additional-variables 'kill-ring)
   (savehist-mode 1))
 
@@ -488,7 +507,7 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
 
 
 (defun clipmon--on-clipboard-change (s)
-  "Clipboard changed - add text to kill ring, and optionally insert it."
+  "Clipboard changed - add text S to kill ring, and optionally insert it."
   (setq clipmon--previous-contents s) ; save contents
   (kill-new s) ; add to kill ring
   (when clipmon--autoinsert
@@ -542,8 +561,9 @@ Returns a string, or nil."
 
 
 (defun clipmon--seconds-since (time)
-  "Return number of seconds elapsed since the given time, including milliseconds.
+  "Return number of seconds elapsed since the given TIME.
 TIME should be in Emacs time format (see `current-time').
+Includes approximate number of milliseconds also.
 Valid for up to 2**16 seconds = 65536 secs ~ 18hrs."
   (let* ((elapsed (time-subtract (current-time) time))
          (seconds (nth 1 elapsed))

@@ -1,6 +1,7 @@
-# ------------------------------------------------------------------------------
+
 # makefile for emacs .tar packages - partially working
-# ------------------------------------------------------------------------------
+# switch to cask, eventually
+
 
 # name of package
 PACKAGE = clipmon
@@ -11,10 +12,9 @@ CONTENTS := clipmon.wav
 # ------------------------------------------------------------------------------
 
 EMACS = emacs
-MAKE-README = script/make-readme.el
-
 SOURCE = ${PACKAGE}.el
 TEST = test/${PACKAGE}-test.el
+MAKE-README = script/make-readme.el
 
 # parse package metadata
 # currently handles only one keyword, and no dependencies
@@ -34,7 +34,7 @@ DEPENDENCIES = "nil"
 PKG = ${PACKAGE}-pkg.el
 PACKAGE_DIR := ${PACKAGE}-${VERSION}
 PACKAGE_TAR := ${PACKAGE}-${VERSION}.tar
-TAR_DIR := tars
+TAR_DIR := tar
 
 # ------------------------------------------------------------------------------
 
@@ -76,7 +76,7 @@ all: info clean compile test pkg readme tar
 # make sure everything compiles, then remove .elc files
 # need -L . so test can (require 'clipmon)
 compile:
-	${EMACS} -Q --batch -L . -f batch-byte-compile *.el test/*.el
+	${EMACS} -Q --batch -L . -f batch-byte-compile clipmon.el test/clipmon-test.el
 	rm -f *.elc test/*.elc
 
 
@@ -108,7 +108,7 @@ readme:
 
 
 # melpa does this automatically
-tar:
+tar: pkg
 	rm -rdf ${PACKAGE_DIR}
 	mkdir ${PACKAGE_DIR}
 	cp ${SOURCE} ${PACKAGE_DIR}
