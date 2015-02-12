@@ -234,6 +234,8 @@
       (princ "[![Travis build status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon)")
       (princ " ")
       (princ "[![melpa.org](http://melpa.org/packages/clipmon-badge.svg)](http://melpa.org/#/clipmon)")
+      (princ " ")
+      (princ "[![GPL-3.0](http://img.shields.io/:license-gpl-blue.svg)](http://opensource.org/licenses/GPL-3.0)")
       (princ "\n")
       (princ (make-string 76 ?-))
 

@@ -1,5 +1,5 @@
 
-clipmon.el [![Travis build status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon) [![melpa.org](http://melpa.org/packages/clipmon-badge.svg)](http://melpa.org/#/clipmon)
+clipmon.el [![Travis build status](https://secure.travis-ci.org/bburns/clipmon.png?branch=master)](http://travis-ci.org/bburns/clipmon) [![melpa.org](http://melpa.org/packages/clipmon-badge.svg)](http://melpa.org/#/clipmon) [![GPL-3.0](http://img.shields.io/:license-gpl-blue.svg)](http://opensource.org/licenses/GPL-3.0)
 ----------------------------------------------------------------------------
 
 
