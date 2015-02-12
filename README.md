@@ -10,7 +10,7 @@ Clipmon is a clipboard monitor - it watches the system clipboard and can
 automatically insert any new text into the current location in Emacs.
 
 It also adds changes to the system clipboard to the kill ring, making Emacs
-into a cyclic clipboard manager for text - you can then use a package like
+into a clipboard manager for text - you can then use a package like
 browse-kill-ring or helm-ring to view and manage your clipboard history.
 
 You can use it for taking notes from a webpage, for example - just copy the
