@@ -138,76 +138,76 @@
     ))
 
 
-(defun get-tar-file (folder)
-  "Get the latest tar file from the folder."
-  (let* ((files (directory-files folder t "\\.tar$")) ; in sorted order
-         (tar-file (car (last files)))) ; latest tar
-    tar-file))
-; (get-tar-file "../tar")
-; (get-tar-file "./tar")
+; (defun get-tar-file (folder)
+;   "Get the latest tar file from the folder."
+;   (let* ((files (directory-files folder t "\\.tar$")) ; in sorted order
+;          (tar-file (car (last files)))) ; latest tar
+;     tar-file))
+; ; (get-tar-file "../tar")
+; ; (get-tar-file "./tar")
 
 
 
-(ert-deftest clipmon-test-install ()
-  "Test installing from latest tar file to a local elpa folder."
+; (ert-deftest clipmon-test-install ()
+;   "Test installing from latest tar file to a local elpa folder."
   
-  ;; We can make a new elpa folder, call it elpa-test, and install clipmon there,
-  ;; just to see that the install is working correctly. 
-  (let* ((folder-elpa-test (expand-file-name "elpa-test" "."))
-         (package-user-dir folder-elpa-test) ; temporarily bind this
-         (tar-file (get-tar-file "tar")))
+;   ;; We can make a new elpa folder, call it elpa-test, and install clipmon there,
+;   ;; just to see that the install is working correctly. 
+;   (let* ((folder-elpa-test (expand-file-name "elpa-test" "."))
+;          (package-user-dir folder-elpa-test) ; temporarily bind this
+;          (tar-file (get-tar-file "tar")))
     
-    ;; delete elpa-test folder to start new
-    (when (file-exists-p folder-elpa-test)
-      (message "deleting %s..." folder-elpa-test)
-      (delete-directory folder-elpa-test t))
+;     ;; delete elpa-test folder to start new
+;     (when (file-exists-p folder-elpa-test)
+;       (message "deleting %s..." folder-elpa-test)
+;       (delete-directory folder-elpa-test t))
 
-    ;; a typical setup
-    (global-set-key (kbd "C-0") 'clipmon-autoinsert-toggle)
-    (setq clipmon-interval 1) ; an old name
-    (setq clipmon-transform-clip nil) ; a new name
-    (add-to-list 'after-init-hook 'clipmon-mode-start) ; capture to kill ring
-    (add-to-list 'after-init-hook 'clipmon-persist) ; persist kill ring to disk
+;     ;; a typical setup
+;     (global-set-key (kbd "C-0") 'clipmon-autoinsert-toggle)
+;     (setq clipmon-interval 1) ; an old name
+;     (setq clipmon-transform-clip nil) ; a new name
+;     (add-to-list 'after-init-hook 'clipmon-mode-start) ; capture to kill ring
+;     (add-to-list 'after-init-hook 'clipmon-persist) ; persist kill ring to disk
     
-    ;; Note: this file is run in batch mode, which inhibits packages from being initialized,
-    ;; so we must simulate it ourselves.
+;     ;; Note: this file is run in batch mode, which inhibits packages from being initialized,
+;     ;; so we must simulate it ourselves.
     
-    ;; install package from tar file - this also requires/loads the package.
-    ;; this is akin to what package-initialize does, after reading the init file,
-    ;; though package-initialize just loads the autoloads, not the whole file.
-    ;;> so, should add another test to check an existing installation.. somehow.
-    (package-install-file tar-file)
+;     ;; install package from tar file - this also requires/loads the package.
+;     ;; this is akin to what package-initialize does, after reading the init file,
+;     ;; though package-initialize just loads the autoloads, not the whole file.
+;     ;;> so, should add another test to check an existing installation.. somehow.
+;     (package-install-file tar-file)
 
-    ; this hook would be run after package-initialize, so run it here
-    (run-hooks 'after-init-hook)
+;     ; this hook would be run after package-initialize, so run it here
+;     (run-hooks 'after-init-hook)
     
-    ;; make sure menu is there
-    (should (key-binding [menu-bar options clipmon-killring]))
+;     ;; make sure menu is there
+;     (should (key-binding [menu-bar options clipmon-killring]))
     
-    ;; and settings
-    (should (boundp 'clipmon-timer-interval))
+;     ;; and settings
+;     (should (boundp 'clipmon-timer-interval))
     
-    ;; see if files got there okay - .el, .wav
-    ;; (dired folder-elpa-test)
-    ;; (assert (member "clipmon.el" (directory-files latestclipmonfolder)))
+;     ;; see if files got there okay - .el, .wav
+;     ;; (dired folder-elpa-test)
+;     ;; (assert (member "clipmon.el" (directory-files latestclipmonfolder)))
 
-    ;; check renamings
-    (should (eq 1 clipmon-timer-interval))
-    (should (eq clipmon-timeout clipmon-autoinsert-timeout))
+;     ;; check renamings
+;     (should (eq 1 clipmon-timer-interval))
+;     (should (eq clipmon-timeout clipmon-autoinsert-timeout))
 
-    ;; turn on and off
-    (let ((clipmon-autoinsert-sound nil)) ; quiet
-      (clipmon-autoinsert-toggle)
-      (clipmon-mode 0)
-      (should (null clipmon--autoinsert))
-      (should (null clipmon-mode)))
+;     ;; turn on and off
+;     (let ((clipmon-autoinsert-sound nil)) ; quiet
+;       (clipmon-autoinsert-toggle)
+;       (clipmon-mode 0)
+;       (should (null clipmon--autoinsert))
+;       (should (null clipmon-mode)))
     
-    ;; other things to check
-    ;; (find-library "clipmon")
-    ;; (describe-package "clipmon")
-    ;; (customize-group 'clipmon)
+;     ;; other things to check
+;     ;; (find-library "clipmon")
+;     ;; (describe-package "clipmon")
+;     ;; (customize-group 'clipmon)
     
-    ))
+;     ))
 
 
 ;;; clipmon-test.el ends here
