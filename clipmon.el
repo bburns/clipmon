@@ -407,8 +407,7 @@ find-library RET clipmon RET."
   "Start clipboard monitor - watch system clipboard, add changes to kill ring."
   (interactive)
   (setq clipmon-mode t) ; in case called outside of clipmon-mode fn
-  (if clipmon--timer
-      (message "Clipboard monitor already running.")
+  (unless clipmon--timer
     (setq clipmon--previous-contents (clipmon--clipboard-contents))
     (setq clipmon--timer
           (run-at-time nil clipmon-timer-interval 'clipmon--check-clipboard))
@@ -420,8 +419,7 @@ find-library RET clipmon RET."
   "Stop clipboard monitor and autoinsert modes."
   (interactive)
   (setq clipmon-mode nil) ; in case called outside of clipmon-mode fn
-  (if (null clipmon--timer)
-      (message "Clipboard monitor already stopped.")
+  (when clipmon--timer
     (cancel-timer clipmon--timer)
     (setq clipmon--timer nil)
     (if clipmon--autoinsert (clipmon-autoinsert-stop)) ; turn off autoinsert also
