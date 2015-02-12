@@ -110,13 +110,13 @@ readme:
 
 # melpa does this automatically
 tar: pkg
-	rm -rdf ${PACKAGE_DIR}
+	rm -rf ${PACKAGE_DIR}
 	mkdir ${PACKAGE_DIR}
 	cp ${SOURCE} ${PACKAGE_DIR}
 	cp ${PKG} ${PACKAGE_DIR}
 	cp -r ${CONTENTS} ${PACKAGE_DIR}
 	tar -cvf ${PACKAGE_TAR} ${PACKAGE_DIR}
-	rm -rdf ${PACKAGE_DIR}
+	rm -rf ${PACKAGE_DIR}
 	tar -tvf ${PACKAGE_TAR}
 	mkdir -p ${TAR_DIR}
 	mv ${PACKAGE_TAR} ${TAR_DIR}
