@@ -28,10 +28,6 @@
 ;;;; Description
 ;; ----------------------------------------------------------------------------
 ;;
-;; **Upgrade note (2015-02-11): you'll need to rebind your shortcut key to
-;; `clipmon-autoinsert-toggle' instead of `clipmon-mode' - details below.**
-;;
-;;
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and can
 ;; automatically insert any new text into the current location in Emacs.
 ;;
@@ -396,10 +392,15 @@ E.g. to make the text lowercase before pasting,
 ;;;###autoload
 (define-minor-mode clipmon-mode
   "Start/stop clipboard monitor - watch system clipboard, add changes to kill ring.
+
 To also insert the changes to the system clipboard at the current
 location, call `clipmon-autoinsert-toggle' to turn autoinsert on
-and off. See commentary in source file for more information - M-x
-find-library RET clipmon RET."
+and off. See commentary in source file for more information -
+M-: (find-library 'clipmon).
+
+Upgrade note (2015-02-11): you'll need to bind your shortcut key to
+`clipmon-autoinsert-toggle' instead of `clipmon-mode'. 
+"
   :global t
   :lighter ""
   ; value of clipmon-mode is toggled before this implicitly

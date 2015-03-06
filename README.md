@@ -6,10 +6,6 @@ clipmon.el [![Travis build status](https://secure.travis-ci.org/bburns/clipmon.p
 Description
 ----------------------------------------------------------------------------
 
-**Upgrade note (2015-02-11): you'll need to rebind your shortcut key to
-`clipmon-autoinsert-toggle` instead of `clipmon-mode` - details below.**
-
-
 Clipmon is a clipboard monitor - it watches the system clipboard and can
 automatically insert any new text into the current location in Emacs.
 
