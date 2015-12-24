@@ -6,9 +6,9 @@ clipmon.el [![Travis build status](https://secure.travis-ci.org/bburns/clipmon.p
 Description
 ----------------------------------------------------------------------------
 
-**Upgrade note (2015-02-11): you'll need to rebind your shortcut key to
-`clipmon-autoinsert-toggle` instead of `clipmon-mode` - details below.**
-
+**Warning (2015-12-24): on GNU Linux/BSD with clipmon-mode on, bringing up a
+  graphical menu (e.g. Shift+Mouse-1) can cause Emacs to hang. A fix is in
+  the works.**
 
 Clipmon is a clipboard monitor - it watches the system clipboard and can
 automatically insert any new text into the current location in Emacs.
@@ -183,42 +183,12 @@ Todo
 - Prefix with C-u to set a target point, then allow cut/copy/pasting from
   within Emacs, eg to take notes from another buffer, or move text elsewhere.
 
-History
-----------------------------------------------------------------------------
-
-20150211 refactored to handle kill ring better.
-  clipmon-mode now just adds changes to the kill-ring.
-  clipmon-autoinsert-toggle added to toggle automatic inserting of text.
-  changed several setting names - all with aliases to old names.
-  clipmon-action removed - no longer needed to call kill-new or insert with it.
-20150131 added clipmon-action, to accommodate adding to kill-ring
-20150120 initial release
-
-
-Sound File
-----------------------------------------------------------------------------
-
-The sound file was created with Audacity [http://audacity.sourceforge.net/].
-It's a bit on the quiet side so hopefully it doesn't get annoying when you're
-taking a lot of notes.
-
-
-Feedback and Thanks
-----------------------------------------------------------------------------
-
-Feedback is always welcome - for feature requests or bug reports, see the
-Github issues page [https://github.com/bburns/clipmon/issues]. Pull requests
-are welcome also.
-
-Thanks go to tuhdo for suggesting using clipmon as a clipboard manager, and
-Steve Purcell for initial feedback.
-
 
 ----
 
 Author: Brian Burns  
 URL: https://github.com/bburns/clipmon  
-Version: 20150211  
+Version: 20151224  
 
 This file was generated from commentary in clipmon.el - do not edit!
 
