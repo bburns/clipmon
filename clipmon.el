@@ -5,7 +5,7 @@
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
 ;; Keywords: convenience
-;; Version: 20150211
+;; Version: 20151224
 ;;
 ;; This package is NOT part of GNU Emacs.
 ;;
@@ -28,9 +28,9 @@
 ;;;; Description
 ;; ----------------------------------------------------------------------------
 ;;
-;; **Upgrade note (2015-02-11): you'll need to rebind your shortcut key to
-;; `clipmon-autoinsert-toggle' instead of `clipmon-mode' - details below.**
-;;
+;; **Warning (2015-12-24): on GNU Linux/BSD with clipmon-mode on, bringing up a
+;;   graphical menu (e.g. Shift+Mouse-1) can cause Emacs to hang. A fix is in
+;;   the works.**
 ;;
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and can
 ;; automatically insert any new text into the current location in Emacs.
@@ -205,36 +205,6 @@
 ;; - Prefix with C-u to set a target point, then allow cut/copy/pasting from
 ;;   within Emacs, eg to take notes from another buffer, or move text elsewhere.
 ;;
-;;;; History
-;; ----------------------------------------------------------------------------
-;;
-;; 20150211 refactored to handle kill ring better.
-;;   clipmon-mode now just adds changes to the kill-ring.
-;;   clipmon-autoinsert-toggle added to toggle automatic inserting of text.
-;;   changed several setting names - all with aliases to old names.
-;;   clipmon-action removed - no longer needed to call kill-new or insert with it.
-;; 20150131 added clipmon-action, to accommodate adding to kill-ring
-;; 20150120 initial release
-;;
-;;
-;;;; Sound File
-;; ----------------------------------------------------------------------------
-;;
-;; The sound file was created with Audacity [http://audacity.sourceforge.net/].
-;; It's a bit on the quiet side so hopefully it doesn't get annoying when you're
-;; taking a lot of notes.
-;;
-;;
-;;;; Feedback and Thanks
-;; ----------------------------------------------------------------------------
-;;
-;; Feedback is always welcome - for feature requests or bug reports, see the
-;; Github issues page [https://github.com/bburns/clipmon/issues]. Pull requests
-;; are welcome also.
-;;
-;; Thanks go to tuhdo for suggesting using clipmon as a clipboard manager, and
-;; Steve Purcell for initial feedback.
-;;
 ;;
 ;;; Code:
 
@@ -396,10 +366,15 @@ E.g. to make the text lowercase before pasting,
 ;;;###autoload
 (define-minor-mode clipmon-mode
   "Start/stop clipboard monitor - watch system clipboard, add changes to kill ring.
+
 To also insert the changes to the system clipboard at the current
 location, call `clipmon-autoinsert-toggle' to turn autoinsert on
-and off. See commentary in source file for more information - M-x
-find-library RET clipmon RET."
+and off. See commentary in source file for more information -
+M-: (find-library 'clipmon).
+
+Upgrade note (2015-02-11): you'll need to bind your shortcut key to
+`clipmon-autoinsert-toggle' instead of `clipmon-mode'. 
+"
   :global t
   :lighter ""
   ; value of clipmon-mode is toggled before this implicitly
@@ -552,8 +527,8 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
 (defun clipmon--clipboard-contents ()
   "Get current contents of system clipboard, as opposed to Emacs's kill ring.
 Returns a string, or nil."
-  ; when the OS is first started x-get-selection-value will throw (error "No
-  ; selection is available")
+  ;; when the OS is first started x-get-selection-value will throw (error "No
+  ;; selection is available")
   (ignore-errors (x-get-selection-value)))
 
 
