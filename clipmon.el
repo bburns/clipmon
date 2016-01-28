@@ -528,6 +528,8 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
     (mapc (lambda (s) (setq sum (+ sum (length s)))) kill-ring) sum))
 
 
+(declare-function x-selection-owner-p "xselect.c" (&optional selection terminal))
+
 (defun clipmon--clipboard-contents ()
   "Get current contents of system clipboard - returns a string, or nil."
   ;; when the OS is first started x-get-selection-value will throw (error "No
