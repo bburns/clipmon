@@ -1,11 +1,11 @@
 ;;; clipmon.el --- Clipboard monitor - watch system clipboard, add changes to kill ring/autoinsert
 ;;
-;; Copyright (c) 2015 Brian Burns
+;; Copyright (c) 2015-2016 Brian Burns
 ;;
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
 ;; Keywords: convenience
-;; Version: 20151224
+;; Version: 20160118
 ;;
 ;; This package is NOT part of GNU Emacs.
 ;;
@@ -28,9 +28,17 @@
 ;;;; Description
 ;; ----------------------------------------------------------------------------
 ;;
-;; **Warning (2015-12-24): on GNU Linux/BSD with clipmon-mode on, bringing up a
-;;   graphical menu (e.g. Shift+Mouse-1) can cause Emacs to hang. A fix is in
-;;   the works.**
+;; **Warning (2015-12-24): in an X-windows system with clipmon-mode on, bringing
+;;   up a graphical menu (e.g. Shift+Mouse-1) will cause Emacs to hang. See
+;;   http://debbugs.gnu.org/cgi/bugreport.cgi?bug=22214.
+;;   X-windows starts a timer
+;;   when checking the contents of the clipboard, which interferes with the
+;;   clipmon timer, causing an endless loop.**
+;;
+;; Update (2016-01-18): in an X-windows system, Clipmon now uses the clipboard instead of
+;; the primary selection - see
+;; https://github.com/bburns/clipmon/issues/4. If you'd like to revert to the
+;; original behavior, set the variable `clipmon-use-primary-selection' to t.
 ;;
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and can
 ;; automatically insert any new text into the current location in Emacs.
@@ -244,6 +252,13 @@
   :group 'clipmon
   :type 'integer)
 
+(defcustom clipmon-use-primary-selection nil
+  "If non-nil, use the X-windows primary selection instead of the clipboard.
+This would enable you to simply select text in another application
+instead of needing to copy it to the clipboard also."
+  :group 'clipmon
+  :type 'boolean)
+
 (defcustom clipmon-autoinsert-color "red"
   "Color to set cursor when clipmon autoinsert is on.  Set to nil for no change."
   :group 'clipmon
@@ -351,8 +366,8 @@ E.g. to make the text lowercase before pasting,
   "Original cursor color.")
 
 (defconst clipmon--folder
-  (file-name-directory load-file-name)
-  "Path to clipmon install folder.")
+  (file-name-directory (or load-file-name (file-name-directory (buffer-file-name))))
+  "Path to clipmon install folder, or current buffer's location.")
 
 (defconst clipmon--included-sound-file
   (expand-file-name "clipmon.wav" clipmon--folder)
@@ -524,11 +539,27 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
 
 
 (defun clipmon--clipboard-contents ()
-  "Get current contents of system clipboard, as opposed to Emacs's kill ring.
+  "Get current contents of system clipboard or primary selection.
 Returns a string, or nil."
   ;; when the OS is first started x-get-selection-value will throw (error "No
-  ;; selection is available")
-  (ignore-errors (x-get-selection-value)))
+  ;; selection is available"), so ignore errors.
+  ;; note: (x-get-selection 'CLIPBOARD) doesn't work on Windows.
+  (if (eq window-system 'w32)
+      (ignore-errors (x-get-selection-value)) ; can be nil
+    ;; need to remove properties or primary selection won't work.
+    ;; and don't add contents to kill-ring if emacs already owns this item,
+    ;; as emacs will handle doing that.
+    (let ((v
+           (if clipmon-use-primary-selection
+               (if (x-selection-owner-p 'PRIMARY)
+                   nil
+                 (ignore-errors (x-get-selection 'PRIMARY)))
+             (if (x-selection-owner-p 'CLIPBOARD)
+                 nil
+               (ignore-errors (x-get-selection 'CLIPBOARD)))))
+      (if (null v) nil
+        (substring-no-properties v)))
+    ))
 
 
 (defun clipmon--trim-left (s)
