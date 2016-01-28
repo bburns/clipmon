@@ -99,10 +99,11 @@ pkg:
 
 # generate a readme file from the commentary in the source file.
 # emacs currently generating dos line endings - fix that.
+# had to comment out dos2unix as travis build system didn't seem to have access to it. 
 readme:
 	rm -f README.md
 	${EMACS} --script ${MAKE-README} <${SOURCE} >README.md
-	dos2unix README.md
+	# dos2unix README.md
 	attrib +r README.md
 	head -5 README.md
 	tail -9 README.md
