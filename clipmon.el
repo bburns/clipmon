@@ -5,7 +5,7 @@
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
 ;; Keywords: convenience
-;; Version: 20160118
+;; Version: 20160127
 ;;
 ;; This package is NOT part of GNU Emacs.
 ;;
@@ -28,18 +28,6 @@
 ;;;; Description
 ;; ----------------------------------------------------------------------------
 ;;
-;; **Warning (2015-12-24): in an X-windows system with clipmon-mode on, bringing
-;;   up a graphical menu (e.g. Shift+Mouse-1) will cause Emacs to hang. See
-;;   http://debbugs.gnu.org/cgi/bugreport.cgi?bug=22214.
-;;   X-windows starts a timer
-;;   when checking the contents of the clipboard, which interferes with the
-;;   clipmon timer, causing an endless loop.**
-;;
-;; Update (2016-01-18): in an X-windows system, Clipmon now uses the clipboard instead of
-;; the primary selection - see
-;; https://github.com/bburns/clipmon/issues/4. If you'd like to revert to the
-;; original behavior, set the variable `clipmon-use-primary-selection' to t.
-;;
 ;; Clipmon is a clipboard monitor - it watches the system clipboard and can
 ;; automatically insert any new text into the current location in Emacs.
 ;;
@@ -47,7 +35,16 @@
 ;; into a clipboard manager for text - you can then use a package like
 ;; browse-kill-ring or helm-ring to view and manage your clipboard history.
 ;;
-;; You can use it for taking notes from a webpage, for example - just copy the
+;; **Warning (2015-12-24): in an X-windows system with clipmon-mode on, bringing
+;;   up a graphical menu (e.g. Shift+Mouse-1) will cause Emacs to hang. See
+;;   http://debbugs.gnu.org/cgi/bugreport.cgi?bug=22214.
+;;   X-windows starts a timer when checking the contents of the clipboard, which
+;;   interferes with the clipmon timer.**
+;;
+;; Update (2016-01-27): in an X-windows system, Clipmon now uses the clipboard
+;; instead of the primary selection - see https://github.com/bburns/clipmon/issues/4.
+;;
+;; You can use Clipmon for taking notes from a webpage, for example - just copy the
 ;; text you want to save and it will be added to Emacs. It helps to have an
 ;; autocopy feature or addon for the browser, e.g. AutoCopy 2 for Firefox - then
 ;; you can just select text to add it to Emacs.
@@ -251,13 +248,6 @@
   "Interval for checking system clipboard for changes, in seconds."
   :group 'clipmon
   :type 'integer)
-
-(defcustom clipmon-use-primary-selection nil
-  "If non-nil, use the X-windows primary selection instead of the clipboard.
-This would enable you to simply select text in another application
-instead of needing to copy it to the clipboard also."
-  :group 'clipmon
-  :type 'boolean)
 
 (defcustom clipmon-autoinsert-color "red"
   "Color to set cursor when clipmon autoinsert is on.  Set to nil for no change."
@@ -539,24 +529,18 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
 
 
 (defun clipmon--clipboard-contents ()
-  "Get current contents of system clipboard or primary selection.
-Returns a string, or nil."
+  "Get current contents of system clipboard - returns a string, or nil."
   ;; when the OS is first started x-get-selection-value will throw (error "No
   ;; selection is available"), so ignore errors.
   ;; note: (x-get-selection 'CLIPBOARD) doesn't work on Windows.
   (if (eq window-system 'w32)
       (ignore-errors (x-get-selection-value)) ; can be nil
-    ;; need to remove properties or primary selection won't work.
-    ;; and don't add contents to kill-ring if emacs already owns this item,
+    ;; don't add contents to kill-ring if emacs already owns this item,
     ;; as emacs will handle doing that.
-    (let ((v
-           (if clipmon-use-primary-selection
-               (if (x-selection-owner-p 'PRIMARY)
-                   nil
-                 (ignore-errors (x-get-selection 'PRIMARY)))
-             (if (x-selection-owner-p 'CLIPBOARD)
+    (let ((v (if (x-selection-owner-p 'CLIPBOARD)
                  nil
                (ignore-errors (x-get-selection 'CLIPBOARD)))))
+      ;; need to remove properties or selection won't work.
       (if (null v) nil
         (substring-no-properties v)))
     ))

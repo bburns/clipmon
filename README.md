@@ -6,10 +6,6 @@ clipmon.el [![Travis build status](https://secure.travis-ci.org/bburns/clipmon.p
 Description
 ----------------------------------------------------------------------------
 
-**Warning (2015-12-24): on GNU Linux/BSD with clipmon-mode on, bringing up a
-  graphical menu (e.g. Shift+Mouse-1) can cause Emacs to hang. A fix is in
-  the works.**
-
 Clipmon is a clipboard monitor - it watches the system clipboard and can
 automatically insert any new text into the current location in Emacs.
 
@@ -17,7 +13,16 @@ It also adds changes to the system clipboard to the kill ring, making Emacs
 into a clipboard manager for text - you can then use a package like
 browse-kill-ring or helm-ring to view and manage your clipboard history.
 
-You can use it for taking notes from a webpage, for example - just copy the
+**Warning (2015-12-24): in an X-windows system with clipmon-mode on, bringing
+  up a graphical menu (e.g. Shift+Mouse-1) will cause Emacs to hang. See
+  http://debbugs.gnu.org/cgi/bugreport.cgi?bug=22214.
+  X-windows starts a timer when checking the contents of the clipboard, which
+  interferes with the clipmon timer.**
+
+Update (2016-01-27): in an X-windows system, Clipmon now uses the clipboard
+instead of the primary selection - see https://github.com/bburns/clipmon/issues/4.
+
+You can use Clipmon for taking notes from a webpage, for example - just copy the
 text you want to save and it will be added to Emacs. It helps to have an
 autocopy feature or addon for the browser, e.g. AutoCopy 2 for Firefox - then
 you can just select text to add it to Emacs.
@@ -96,7 +101,7 @@ You can also turn it on and off from the Options menu.
 
 Also, if no change is detected after a certain number of minutes, autoinsert will
 turn itself off automatically with another beep. This is so you don't forget
-that autoinsert is on and accidentally add text to your buffer. 
+that autoinsert is on and accidentally add text to your buffer.
 
 And note: if you happen to copy the same text to the clipboard twice, clipmon
 won't know about the second time, as it only detects changes. And if you copy
@@ -188,7 +193,7 @@ Todo
 
 Author: Brian Burns  
 URL: https://github.com/bburns/clipmon  
-Version: 20151224  
+Version: 20160127  
 
 This file was generated from commentary in clipmon.el - do not edit!
 
