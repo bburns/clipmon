@@ -118,7 +118,7 @@
 ;;
 ;; Also, if no change is detected after a certain number of minutes, autoinsert will
 ;; turn itself off automatically with another beep. This is so you don't forget
-;; that autoinsert is on and accidentally add text to your buffer. 
+;; that autoinsert is on and accidentally add text to your buffer.
 ;;
 ;; And note: if you happen to copy the same text to the clipboard twice, clipmon
 ;; won't know about the second time, as it only detects changes. And if you copy
@@ -373,8 +373,7 @@ and off. See commentary in source file for more information -
 M-: (find-library 'clipmon).
 
 Upgrade note (2015-02-11): you'll need to bind your shortcut key to
-`clipmon-autoinsert-toggle' instead of `clipmon-mode'. 
-"
+`clipmon-autoinsert-toggle' instead of `clipmon-mode'."
   :global t
   :lighter ""
   ; value of clipmon-mode is toggled before this implicitly
@@ -471,8 +470,8 @@ default, including the minibuffer history - see function
   "Check the clipboard and call `clipmon--on-clipboard-change' if changed.
 Otherwise check autoinsert idle timer and stop if it's been idle a while."
   (let ((s (clipmon--clipboard-contents))) ; s may actually be nil here
-    (if (and s (not (string-equal s clipmon--previous-contents))) ; if changed
-        (clipmon--on-clipboard-change s)
+    (if (and s (not (string-equal s clipmon--previous-contents))) ; if not nil, and changed
+        (clipmon--on-clipboard-change s) ; add to kill-ring, autoinsert
       ;; otherwise stop autoinsert if clipboard has been idle a while
       (if (and clipmon--autoinsert clipmon-autoinsert-timeout)
           (let ((idle-seconds (clipmon--seconds-since clipmon--autoinsert-timeout-start)))
