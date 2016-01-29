@@ -2,15 +2,39 @@
 # build script for travis continuous integration
 # https://travis-ci.org/bburns/clipmon
 # adapted from https://github.com/magnars/dash.el/blob/master/.travis.yml
+# and https://github.com/company-mode/company-mode/blob/master/.travis.yml
 
-language: emacs-lisp
+# travis-lint no longer permits this value
+# language: emacs-lisp
+language: generic
 
 
-before_install:
+env:
+  # - EMACS=emacs23 # fails, can't load ert
+  # - EMACS=emacs24
+  # - EMACS=emacs-snapshot
+  matrix:
+    - EMACS=emacs24
+    - EMACS=emacs-snapshot
+
+
+install:
+  - if [ "$EMACS" = "emacs24" ]; then
+        sudo add-apt-repository -y ppa:cassou/emacs &&
+        sudo apt-get update -qq &&
+        sudo apt-get install -qq emacs24 emacs24-el;
+    fi
+  - if [ "$EMACS" = "emacs-snapshot" ]; then
+        sudo add-apt-repository -y ppa:ubuntu-elisp/ppa &&
+        sudo apt-get update -qq &&
+        sudo apt-get -qq -f install &&
+        sudo apt-get install -qq emacs-snapshot;
+    fi
+
 
   # PPA for stable Emacs packages, only up to 24.3
   # https://launchpad.net/~cassou/+archive/ubuntu/emacs
-  - sudo add-apt-repository -y ppa:cassou/emacs
+  # - sudo add-apt-repository -y ppa:cassou/emacs
 
   # PPA for Emacs 24.4
   # https://launchpad.net/~andreas-h/+archive/ubuntu/emacs
@@ -18,16 +42,15 @@ before_install:
 
   # PPA for Emacs nightlies, 25.1?
   # https://launchpad.net/~ubuntu-elisp/+archive/ubuntu/ppa
-  - sudo add-apt-repository -y ppa:ubuntu-elisp/ppa
+  # - sudo add-apt-repository -y ppa:ubuntu-elisp/ppa
 
   # Update and install the Emacs for our environment
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq -yy ${EMACS}-nox ${EMACS}-el
+  # - sudo apt-get update -qq
+  # - sudo apt-get install -qq -yy ${EMACS}-nox ${EMACS}-el
 
-env:
-  # - EMACS=emacs23 # fails, can't load ert
-  - EMACS=emacs24
-  - EMACS=emacs-snapshot
+
+script:
+  make test
 
 
 # By default, a build email is sent to the committer and the author,
@@ -36,9 +59,5 @@ notifications:
   email:
     on_success: always
     on_failure: always
-
-
-script:
-  make test
 
 
