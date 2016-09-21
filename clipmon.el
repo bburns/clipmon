@@ -529,25 +529,44 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
     (mapc (lambda (s) (setq sum (+ sum (length s)))) kill-ring) sum))
 
 
-(declare-function x-selection-owner-p "xselect.c" (&optional selection terminal))
+(defun clipmon--remove-properties (s)
+  "Remove formatting properties from string S."
+  (if (null s) nil
+    (substring-no-properties s)))
+
+
+(defun clipmon--emacs-owns-clipboard-contents ()
+  "Does Emacs own the clipboard contents?"
+  (cond ((fboundp 'gui-backend-selection-owner-p) ; emacs 25.1
+         (gui-backend-selection-owner-p 'CLIPBOARD))
+        (t ; emacs <=24.5
+         (x-selection-owner-p 'CLIPBOARD))))
+
+
+(defun clipmon--get-selection ()
+  "Get the clipboard contents"
+  ;; Note: When the OS is first started these functions will throw
+  ;; (error "No selection is available"), so need to ignore errors.
+  (cond ((fboundp 'gui-get-selection) ; emacs 25.1
+         (ignore-errors (gui-get-selection)))
+        ((eq window-system 'w32) ; emacs <=24.5
+         ;; Note: (x-get-selection 'CLIPBOARD) doesn't work on Windows.
+         (ignore-errors (x-get-selection-value))) ; can be nil
+        (t ; emacs <=24.5
+         (ignore-errors (x-get-selection 'CLIPBOARD 'UTF8-STRING)))))
+
 
 (defun clipmon--clipboard-contents ()
   "Get current contents of system clipboard - returns a string, or nil."
-  ;; when the OS is first started x-get-selection-value will throw (error "No
-  ;; selection is available"), so ignore errors.
-  ;; note: (x-get-selection 'CLIPBOARD) doesn't work on Windows.
-  (if (eq window-system 'w32)
-      (ignore-errors (x-get-selection-value)) ; can be nil
-    ;; don't add contents to kill-ring if emacs already owns this item,
-    ;; as emacs will handle doing that.
-    (let ((contents (if (x-selection-owner-p 'CLIPBOARD)
-                 nil
-               ;; fix issue #6 Unreadable codes when dealing with Chinese - add 'UTF8-STRING
-               (ignore-errors (x-get-selection 'CLIPBOARD 'UTF8-STRING)))))
-      ;; need to remove properties or selection won't work.
-      (if (null contents) nil
-        (substring-no-properties contents)))
-    ))
+  ;; Need to remove properties or selection won't work.
+  (clipmon--remove-properties
+   ;; Don't add contents to kill-ring if Emacs already owns this item,
+   ;; as Emacs will handle doing that.
+   (if (clipmon--emacs-owns-clipboard-contents)
+       nil
+     (clipmon--get-selection))))
+
+; (clipmon--clipboard-contents)
 
 
 (defun clipmon--trim-left (s)
