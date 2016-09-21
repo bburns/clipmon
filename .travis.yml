@@ -4,6 +4,10 @@
 # adapted from https://github.com/magnars/dash.el/blob/master/.travis.yml
 # and https://github.com/company-mode/company-mode/blob/master/.travis.yml
 
+# the emacs snapshot is from here, and should be the latest version
+# https://launchpad.net/~ubuntu-elisp/+archive/ubuntu/ppa
+
+
 # travis-lint no longer permits this value
 # language: emacs-lisp
 language: generic
