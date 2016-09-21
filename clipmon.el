@@ -540,12 +540,13 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
       (ignore-errors (x-get-selection-value)) ; can be nil
     ;; don't add contents to kill-ring if emacs already owns this item,
     ;; as emacs will handle doing that.
-    (let ((v (if (x-selection-owner-p 'CLIPBOARD)
+    (let ((contents (if (x-selection-owner-p 'CLIPBOARD)
                  nil
-               (ignore-errors (x-get-selection 'CLIPBOARD)))))
+               ;; fix issue #6 Unreadable codes when dealing with Chinese - add 'UTF8-STRING
+               (ignore-errors (x-get-selection 'CLIPBOARD 'UTF8-STRING)))))
       ;; need to remove properties or selection won't work.
-      (if (null v) nil
-        (substring-no-properties v)))
+      (if (null contents) nil
+        (substring-no-properties contents)))
     ))
 
 
