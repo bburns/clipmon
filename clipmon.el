@@ -514,8 +514,9 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
   "Play a user-specified sound file, the included sound file, or nothing."
   (if clipmon-autoinsert-sound
       (if (stringp clipmon-autoinsert-sound)
-          (play-sound-file clipmon-autoinsert-sound)
-          (play-sound-file clipmon--included-sound-file))))
+          ;; play-sound-file can throw an error if no sound device found
+          (ignore-errors (play-sound-file clipmon-autoinsert-sound))
+          (ignore-errors (play-sound-file clipmon--included-sound-file)))))
 
 
 
