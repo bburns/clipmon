@@ -548,12 +548,12 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
   ;; Note: When the OS is first started these functions will throw
   ;; (error "No selection is available"), so need to ignore errors.
   (cond ((fboundp 'gui-get-selection) ; emacs 25.1
-         (ignore-errors (gui-get-selection)))
+         (ignore-errors (gui-get-selection 'CLIPBOARD 'UTF8_STRING)))
         ((eq window-system 'w32) ; emacs <=24.5
          ;; Note: (x-get-selection 'CLIPBOARD) doesn't work on Windows.
          (ignore-errors (x-get-selection-value))) ; can be nil
         (t ; emacs <=24.5
-         (ignore-errors (x-get-selection 'CLIPBOARD 'UTF8-STRING)))))
+         (ignore-errors (x-get-selection 'CLIPBOARD 'UTF8_STRING)))))
 
 
 (defun clipmon--clipboard-contents ()
