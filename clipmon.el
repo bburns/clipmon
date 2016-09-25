@@ -5,7 +5,7 @@
 ;; Author: Brian Burns <bburns.km@gmail.com>
 ;; URL: https://github.com/bburns/clipmon
 ;; Keywords: convenience
-;; Version: 20160127
+;; Version: 20160925
 ;;
 ;; This package is NOT part of GNU Emacs.
 ;;
