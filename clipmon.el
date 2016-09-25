@@ -494,7 +494,7 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
   (when clipmon--autoinsert
     (setq s (clipmon--autoinsert-transform-text s))
     (insert s)
-    (undo-boundary)
+    (undo-boundary) ; mark a boundary between undo units
     (clipmon--play-sound)
     (setq clipmon--autoinsert-timeout-start (current-time)))) ; reset timeout
 
@@ -537,40 +537,39 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
 
 (defun clipmon--emacs-owns-clipboard-contents ()
   "Does Emacs own the clipboard contents?"
-  (cond ((fboundp 'gui-backend-selection-owner-p) ; emacs 25.1
+  (cond ((fboundp 'gui-backend-selection-owner-p) ; emacs25
          (gui-backend-selection-owner-p 'CLIPBOARD))
-        (t ; emacs <=24.5
+        (t ; emacs24
          (x-selection-owner-p 'CLIPBOARD))))
-
+; (clipmon--emacs-owns-clipboard-contents)
 
 (defun clipmon--get-selection ()
   "Get the clipboard contents"
   ;; Note: When the OS is first started these functions will throw
   ;; (error "No selection is available"), so need to ignore errors.
-  (cond ((fboundp 'gui-get-selection) ; emacs 25.1
+  (cond ((fboundp 'gui-get-selection) ; emacs25
          ; better to (setq selection-coding-system 'utf-8) to handle chinese,
          ; which is the default value for gui-get-selection etc
          ; because windows needs STRING. same below.
          ; (ignore-errors (gui-get-selection 'CLIPBOARD 'UTF8_STRING)))
          (ignore-errors (gui-get-selection 'CLIPBOARD))) ; for windows needs STRING
-        ((eq window-system 'w32) ; emacs <=24.5
+        ((eq window-system 'w32) ; windows/emacs24
          ;; Note: (x-get-selection 'CLIPBOARD) doesn't work on Windows.
          (ignore-errors (x-get-selection-value))) ; can be nil
-        (t ; emacs <=24.5
+        (t ; linux+osx/emacs24
          ; (ignore-errors (x-get-selection 'CLIPBOARD 'UTF8_STRING)))))
          (ignore-errors (x-get-selection 'CLIPBOARD)))))
-
+; (clipmon--get-selection)
 
 (defun clipmon--clipboard-contents ()
   "Get current contents of system clipboard - returns a string, or nil."
-  ;; Need to remove properties or selection won't work.
-  (clipmon--remove-properties
-   ;; Don't add contents to kill-ring if Emacs already owns this item,
-   ;; as Emacs will handle doing that.
-   (if (clipmon--emacs-owns-clipboard-contents)
-       nil
-     (clipmon--get-selection))))
-
+  ;;. do we really need to remove the text properties?
+  (let ((text (clipmon--remove-properties (clipmon--get-selection)))
+        (top-of-kill-ring (clipmon--remove-properties (car kill-ring))))
+    (cond ((null text) nil)
+          ;; don't return the text if user just copied/cut it from emacs
+          ((string= text top-of-kill-ring) nil)
+          (t text))))
 ; (clipmon--clipboard-contents)
 
 
