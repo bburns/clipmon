@@ -48,14 +48,14 @@ install:
   # install with brew [builds from source, took ~15mins]
         # brew install emacs ;
   - if [[ "$TRAVIS_OS_NAME-$EMACS" == "osx-emacs24" ]]; then
-        wget https://emacsformacosx.com/emacs-builds/Emacs-24.5-universal.dmg
-        hdiutil attach Emacs-24.5-universal.dmg
-        sudo ln -s /Volumes/Emacs/Emacs.app/Contents/MacOS/Emacs /usr/local/bin/emacs
+        wget https://emacsformacosx.com/emacs-builds/Emacs-24.5-universal.dmg &&
+        hdiutil attach Emacs-24.5-universal.dmg &&
+        sudo ln -s /Volumes/Emacs/Emacs.app/Contents/MacOS/Emacs /usr/local/bin/emacs;
     fi
   - if [[ "$TRAVIS_OS_NAME-$EMACS" == "osx-emacs25" ]]; then
-        wget https://emacsformacosx.com/emacs-builds/Emacs-25.1-universal.dmg
-        hdiutil attach Emacs-25.1-universal.dmg
-        sudo ln -s /Volumes/Emacs/Emacs.app/Contents/MacOS/Emacs /usr/local/bin/emacs
+        wget https://emacsformacosx.com/emacs-builds/Emacs-25.1-universal.dmg &&
+        hdiutil attach Emacs-25.1-universal.dmg &&
+        sudo ln -s /Volumes/Emacs/Emacs.app/Contents/MacOS/Emacs /usr/local/bin/emacs;
     fi
 
 
