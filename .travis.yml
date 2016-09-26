@@ -1,61 +1,66 @@
 
+# .travis.yml
 # build script for travis continuous integration
-# https://travis-ci.org/bburns/clipmon
+# --------------------------------------------------------------------------------
+
+# see https://travis-ci.org/bburns/clipmon
 # adapted from https://github.com/magnars/dash.el/blob/master/.travis.yml
 # and https://github.com/company-mode/company-mode/blob/master/.travis.yml
 
-# the emacs snapshot is from here, and should be the latest version
+# the emacs snapshot is from here, and should be the latest version (ie 25.1):
 # https://launchpad.net/~ubuntu-elisp/+archive/ubuntu/ppa
 
+# validate this file here: http://lint.travis-ci.org/
 
-# travis-lint no longer permits this value
-# language: emacs-lisp
+
+# travis-lint no longer permits emacs-lisp
 language: generic
 
+# test on linux and osx (windows not available on travis ci yet).
+# this os key also multiplies the build matrix (set below).
+os:
+    - linux
+    - osx
 
+# build matrix - test on different emacs versions
 env:
-  # - EMACS=emacs23 # fails, can't load ert
-  # - EMACS=emacs24
-  # - EMACS=emacs-snapshot
   matrix:
     - EMACS=emacs24
-    - EMACS=emacs-snapshot
-
+    - EMACS=emacs25
 
 install:
-  - if [ "$EMACS" = "emacs24" ]; then
+  - if [[ "$TRAVIS_OS_NAME-$EMACS" == "linux-emacs24" ]]; then
         sudo add-apt-repository -y ppa:cassou/emacs &&
         sudo apt-get update -qq &&
         sudo apt-get install -qq emacs24 emacs24-el;
     fi
-  - if [ "$EMACS" = "emacs-snapshot" ]; then
+  - if [[ "$TRAVIS_OS_NAME-$EMACS" == "linux-emacs25" ]]; then
         sudo add-apt-repository -y ppa:ubuntu-elisp/ppa &&
         sudo apt-get update -qq &&
         sudo apt-get -qq -f install &&
         sudo apt-get install -qq emacs-snapshot;
     fi
-
-
-  # PPA for stable Emacs packages, only up to 24.3
-  # https://launchpad.net/~cassou/+archive/ubuntu/emacs
-  # - sudo add-apt-repository -y ppa:cassou/emacs
-
-  # PPA for Emacs 24.4
-  # https://launchpad.net/~andreas-h/+archive/ubuntu/emacs
-  # - sudo add-apt-repository -y ppa:andreas-h/emacs
-
-  # PPA for Emacs nightlies, 25.1?
-  # https://launchpad.net/~ubuntu-elisp/+archive/ubuntu/ppa
-  # - sudo add-apt-repository -y ppa:ubuntu-elisp/ppa
-
-  # Update and install the Emacs for our environment
-  # - sudo apt-get update -qq
-  # - sudo apt-get install -qq -yy ${EMACS}-nox ${EMACS}-el
+  # build from source - per INSTALL instructions [slow]
+        # wget http://mirrors.kernel.org/gnu/emacs/emacs-24.5.tar.gz
+        # tar xf emacs-24.5.tar.gz
+        # cd emacs-24.5
+        # .configure --with-ns
+  # install with brew [builds from source, took ~15mins]
+        # brew install emacs ;
+  - if [[ "$TRAVIS_OS_NAME-$EMACS" == "osx-emacs24" ]]; then
+        wget https://emacsformacosx.com/emacs-builds/Emacs-24.5-universal.dmg
+        hdiutil attach Emacs-24.5-universal.dmg
+        ln -s /Volumes/Emacs/Emacs.app/Contents/MacOS/Emacs /usr/local/bin/emacs
+    fi
+  - if [[ "$TRAVIS_OS_NAME-$EMACS" == "osx-emacs25" ]]; then
+        wget https://emacsformacosx.com/emacs-builds/Emacs-25.1-universal.dmg
+        hdiutil attach Emacs-25.1-universal.dmg
+        ln -s /Volumes/Emacs/Emacs.app/Contents/MacOS/Emacs /usr/local/bin/emacs
+    fi
 
 
 script:
   make test
-
 
 # By default, a build email is sent to the committer and the author,
 # but only if they have access to the repository the commit was pushed to.
@@ -63,5 +68,3 @@ notifications:
   email:
     on_success: always
     on_failure: always
-
-
