@@ -535,14 +535,6 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
     (substring-no-properties s)))
 
 
-(defun clipmon--emacs-owns-clipboard-contents ()
-  "Does Emacs own the clipboard contents?"
-  (cond ((fboundp 'gui-backend-selection-owner-p) ; emacs25
-         (gui-backend-selection-owner-p 'CLIPBOARD))
-        (t ; emacs24
-         (x-selection-owner-p 'CLIPBOARD))))
-; (clipmon--emacs-owns-clipboard-contents)
-
 (defun clipmon--get-selection ()
   "Get the clipboard contents"
   ;; Note: When the OS is first started these functions will throw
@@ -559,7 +551,7 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
         (t ; linux+osx/emacs24
          ; (ignore-errors (x-get-selection 'CLIPBOARD 'UTF8_STRING)))))
          (ignore-errors (x-get-selection 'CLIPBOARD)))))
-; (clipmon--get-selection)
+
 
 (defun clipmon--clipboard-contents ()
   "Get current contents of system clipboard - returns a string, or nil."
@@ -570,7 +562,6 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
           ;; don't return the text if user just copied/cut it from emacs
           ((string= text top-of-kill-ring) nil)
           (t text))))
-; (clipmon--clipboard-contents)
 
 
 (defun clipmon--trim-left (s)
