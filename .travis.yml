@@ -29,6 +29,8 @@ env:
     - EMACS=emacs25
 
 install:
+
+  # linux
   - if [[ "$TRAVIS_OS_NAME-$EMACS" == "linux-emacs24" ]]; then
         sudo add-apt-repository -y ppa:cassou/emacs &&
         sudo apt-get update -qq &&
@@ -40,13 +42,16 @@ install:
         sudo apt-get -qq -f install &&
         sudo apt-get install -qq emacs-snapshot;
     fi
-  # build from source - per INSTALL instructions [slow]
+
+    # osx
+    # build from source - per INSTALL instructions [slow]
         # wget http://mirrors.kernel.org/gnu/emacs/emacs-24.5.tar.gz
         # tar xf emacs-24.5.tar.gz
         # cd emacs-24.5
         # .configure --with-ns
-  # install with brew [builds from source, took ~15mins]
+    # install with brew [builds from source, took ~15mins]
         # brew install emacs ;
+    # even using the .dmg files takes ~6mins each (due to including so many binaries in them?)
   - if [[ "$TRAVIS_OS_NAME-$EMACS" == "osx-emacs24" ]]; then
         wget https://emacsformacosx.com/emacs-builds/Emacs-24.5-universal.dmg &&
         hdiutil attach Emacs-24.5-universal.dmg &&
