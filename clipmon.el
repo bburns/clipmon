@@ -539,7 +539,11 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
   "Get the clipboard contents"
   ;; Note: When the OS is first started these functions will throw
   ;; (error "No selection is available"), so need to ignore errors.
-  (cond ((fboundp 'gui-get-selection) ; emacs25
+  (cond ((boundp 'mac-carbon-version-string) ; emacs mac port
+         ;; Need to have this before emacs25 since `gui-get-selection' is also
+         ;; bound in the mac port, but it doesn't work right
+         (ignore-errors (funcall interprogram-paste-function)))
+        ((fboundp 'gui-get-selection) ; emacs25
          ; better to (setq selection-coding-system 'utf-8) to handle chinese,
          ; which is the default value for gui-get-selection etc
          ; because windows needs STRING. same below.
