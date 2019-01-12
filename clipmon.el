@@ -548,7 +548,7 @@ Otherwise check autoinsert idle timer and stop if it's been idle a while."
          ; which is the default value for gui-get-selection etc
          ; because windows needs STRING. same below.
          ; (ignore-errors (gui-get-selection 'CLIPBOARD 'UTF8_STRING)))
-         (ignore-errors (gui-get-selection 'CLIPBOARD))) ; for windows needs STRING
+         (gui--selection-value-internal 'CLIPBOARD)) ; for windows needs STRING
         ((eq window-system 'w32) ; windows/emacs24
          ;; Note: (x-get-selection 'CLIPBOARD) doesn't work on Windows.
          (ignore-errors (x-get-selection-value))) ; can be nil
